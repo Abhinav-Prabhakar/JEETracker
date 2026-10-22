@@ -5,7 +5,32 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#fcfcfd" />
 <meta name="description" content="A quiet, local-first JEE question tracker: a one-hue contribution year, all-time and 7-day totals, streaks, and a simulated JEE Advanced AIR." />
+<meta name="application-name" content="JEE Tracker" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="JEE Tracker" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<link rel="manifest" href="./manifest.webmanifest" />
+<link rel="apple-touch-icon" sizes="180x180" href="./assets/icons/apple-touch-icon.png" />
+<script>
+/* Apply the saved or preferred theme before the first paint. */
+(function () {
+  var root = document.documentElement;
+  var param = new URLSearchParams(location.search).get('theme');
+  var saved = null;
+  try { saved = localStorage.getItem('jee-tracker.theme'); } catch (e) {}
+  var theme = (param === 'dark' || param === 'light') ? param
+    : (saved === 'dark' || saved === 'light') ? saved
+    : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark'
+    : 'light';
+  root.setAttribute('data-theme', theme);
+  root.style.colorScheme = theme;
+  var meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', theme === 'dark' ? '#0f0f13' : '#fcfcfd');
+})();
+</script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Crect width='20' height='20' rx='6' fill='%23B12F5F'/%3E%3Crect x='5' y='9.2' width='2.8' height='5.8' rx='1.1' fill='%23fff' opacity='.5'/%3E%3Crect x='8.6' y='5' width='2.8' height='10' rx='1.1' fill='%23fff'/%3E%3Crect x='12.2' y='7.4' width='2.8' height='7.6' rx='1.1' fill='%23fff' opacity='.72'/%3E%3C/svg%3E">
+<link rel="icon" type="image/png" sizes="32x32" href="./assets/icons/favicon-32.png">
 <title>JEE Tracker — A quiet dashboard for a loud ambition</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,6 +41,7 @@
    See design.md for tokens, rules and component contracts.
    ============================================================ */
 *{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
 
 :root{
   color-scheme:light;
@@ -29,10 +55,13 @@
   --soft:#f5f5f8;
   --bg:#fcfcfd;
   --card:#ffffff;
+  --raised:#ffffff;
+  --active:#ffffff;
 
   --accent:#b12f5f;
   --accent-ink:#8e2449;
   --accent-soft:#fbebf1;
+  --accent-line:#f0d3de;
 
   --m:#6366f1;
   --p:#f59e0b;
@@ -41,13 +70,90 @@
   --r-lg:22px;
   --r-md:16px;
   --r-sm:10px;
+
+  /* theme surfaces */
+  --topbar:rgba(252,252,253,.82);
+  --backdrop:rgba(252,252,253,.66);
+  --wash:radial-gradient(1100px 520px at 72% -18%, rgba(177,47,95,.055), transparent 62%);
+  --heat-empty:#f3f3f6;
+  --legend-line:rgba(20,20,24,.04);
+  --nav-shadow:0 1px 2px rgba(20,20,24,.07),0 0 0 1px rgba(20,20,24,.035);
+  --pin-glow:rgba(177,47,95,.16);
+  --cell-shadow:rgba(20,20,24,.3);
+
+  /* ink surfaces */
+  --btn-bg:#141418;
+  --btn-ink:#ffffff;
+  --btn-hover:#202028;
+  --tip-bg:#141418;
+  --tip-ink:#ffffff;
+  --tip-sub:#b9b9c4;
+  --tip-row:#d7d7de;
+  --tip-hint:#878792;
+  --tip-dot-muted:#878792;
+
   --shadow-hover:0 24px 48px -32px rgba(20,20,24,.35);
+  --shadow-modal:0 40px 100px -40px rgba(20,20,24,.4);
+  --shadow-tip:0 18px 44px -16px rgba(20,20,24,.5);
+  --shadow-snap:0 30px 60px -34px rgba(20,20,24,.5),0 0 0 1px rgba(20,20,24,.05);
+  --shadow-toast:0 18px 40px -18px rgba(20,20,24,.55);
   --ease:cubic-bezier(.22,.8,.24,1);
   --t-fast:.18s;
   --t:.35s;
 }
 
-html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+html[data-theme="dark"]{
+  color-scheme:dark;
+  --ink:#f4f4f6;
+  --ink-2:#d8d8de;
+  --muted:#a0a0ad;
+  --faint:#7f7f8b;
+  --line:#2a2a33;
+  --line-soft:#22222a;
+  --line-strong:#3a3a45;
+  --soft:#202028;
+  --bg:#0f0f13;
+  --card:#16161c;
+  --raised:#202028;
+  --active:#2c2c36;
+
+  --accent:#d45480;
+  --accent-ink:#f2a7c0;
+  --accent-soft:#2b1720;
+  --accent-line:#6a3047;
+
+  /* subject hues are deliberately unchanged */
+  --m:#6366f1;
+  --p:#f59e0b;
+  --c:#0d9488;
+
+  --topbar:rgba(15,15,19,.82);
+  --backdrop:rgba(15,15,19,.7);
+  --wash:radial-gradient(1100px 520px at 72% -18%, rgba(212,84,128,.075), transparent 62%);
+  --heat-empty:#24242d;
+  --legend-line:rgba(255,255,255,.07);
+  --nav-shadow:0 1px 2px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.045);
+  --pin-glow:rgba(212,84,128,.24);
+  --cell-shadow:rgba(0,0,0,.6);
+
+  --btn-bg:#f4f4f6;
+  --btn-ink:#141418;
+  --btn-hover:#dcdce2;
+  --tip-bg:#2a2a33;
+  --tip-ink:#f4f4f6;
+  --tip-sub:#c4c4cf;
+  --tip-row:#dedee6;
+  --tip-hint:#9a9aa6;
+  --tip-dot-muted:#a0a0ad;
+
+  --shadow-hover:0 24px 48px -32px rgba(0,0,0,.85);
+  --shadow-modal:0 40px 100px -40px rgba(0,0,0,.78);
+  --shadow-tip:0 18px 44px -16px rgba(0,0,0,.7);
+  --shadow-snap:0 30px 60px -34px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.06);
+  --shadow-toast:0 18px 40px -18px rgba(0,0,0,.7);
+}
+
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;background:var(--bg)}
 body{
   background:var(--bg);
   color:var(--ink);
@@ -60,10 +166,12 @@ body{
   font-variant-numeric:tabular-nums;
   min-height:100vh;
   overflow-x:hidden;
+  transition:background-color .3s ease,color .3s ease;
 }
 body::before{
   content:'';position:fixed;inset:0;pointer-events:none;z-index:-1;
-  background:radial-gradient(1100px 520px at 72% -18%, rgba(177,47,95,.055), transparent 62%);
+  background:var(--wash);
+  transition:background .3s ease;
 }
 button,input{font:inherit;letter-spacing:inherit;color:inherit;background:none;border:0}
 button{cursor:pointer}
@@ -76,7 +184,7 @@ svg{display:block}
 /* ── shell ─────────────────────────────────────────────────── */
 .topbar{
   position:sticky;top:0;z-index:80;
-  background:rgba(252,252,253,.82);
+  background:var(--topbar);
   -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
   border-bottom:1px solid transparent;
   transition:border-color .25s ease,background .25s ease;
@@ -104,12 +212,29 @@ svg{display:block}
 }
 .nav-item:hover{color:var(--ink)}
 .nav-item.active{
-  color:var(--ink);background:#fff;
-  box-shadow:0 1px 2px rgba(20,20,24,.07),0 0 0 1px rgba(20,20,24,.035);
+  color:var(--ink);background:var(--active);
+  box-shadow:var(--nav-shadow);
 }
 
 .topbar-right{display:flex;align-items:center;gap:14px;flex-shrink:0}
 .topdate{font-size:11px;color:var(--muted);letter-spacing:.02em;white-space:nowrap}
+.theme-btn{
+  position:relative;width:28px;height:28px;flex-shrink:0;
+  border:1px solid var(--line);border-radius:50%;
+  display:grid;place-items:center;color:var(--muted);
+  transition:border-color .2s ease,color .2s ease,background .2s ease,transform .2s ease;
+}
+.theme-btn:hover{border-color:var(--line-strong);color:var(--ink);background:var(--raised)}
+.theme-btn:active{transform:scale(.94)}
+.theme-ico{
+  position:absolute;inset:0;display:grid;place-items:center;
+  transition:opacity .28s var(--ease),transform .42s var(--ease);
+}
+.theme-ico svg{width:13px;height:13px}
+.theme-ico.sun{opacity:1;transform:rotate(0) scale(1)}
+.theme-ico.moon{opacity:0;transform:rotate(55deg) scale(.55)}
+html[data-theme="dark"] .theme-ico.sun{opacity:0;transform:rotate(-55deg) scale(.55)}
+html[data-theme="dark"] .theme-ico.moon{opacity:1;transform:rotate(0) scale(1)}
 .cmdk-btn{
   display:flex;align-items:center;gap:3px;
   border:1px solid var(--line);border-radius:7px;padding:3px 6px;
@@ -151,22 +276,22 @@ svg{display:block}
 
 .btn{
   display:inline-flex;align-items:center;gap:7px;
-  background:var(--ink);color:#fff;font-size:12px;font-weight:400;
+  background:var(--btn-bg);color:var(--btn-ink);font-size:12px;font-weight:400;
   padding:9px 16px;border-radius:999px;
-  transition:transform .2s ease,opacity .2s ease,background .2s ease;
+  transition:transform .2s ease,opacity .2s ease,background .2s ease,color .2s ease;
 }
-.btn:hover{transform:translateY(-1px);background:#202028}
+.btn:hover{transform:translateY(-1px);background:var(--btn-hover)}
 .btn:active{transform:scale(.97)}
 .btn svg{width:13px;height:13px}
 .btn.ghost{
   background:transparent;color:var(--ink);border:1px solid var(--line);
   padding:8px 14px;
 }
-.btn.ghost:hover{border-color:var(--line-strong);background:#fff}
+.btn.ghost:hover{border-color:var(--line-strong);background:var(--raised)}
 
 kbd{
   font-family:inherit;font-size:9.5px;font-weight:400;color:var(--muted);
-  background:#fff;border:1px solid var(--line);border-bottom-color:var(--line-strong);
+  background:var(--raised);border:1px solid var(--line);border-bottom-color:var(--line-strong);
   border-radius:5px;padding:2px 4px;min-width:17px;text-align:center;
   display:inline-block;line-height:1.25;
 }
@@ -174,7 +299,7 @@ kbd{
 /* ── cards ─────────────────────────────────────────────────── */
 .card{
   background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);
-  transition:border-color .35s ease,box-shadow .35s ease,transform .35s ease;
+  transition:border-color .35s ease,box-shadow .35s ease,transform .35s ease,background-color .3s ease;
 }
 .card.interactive:hover{
   border-color:var(--line-strong);
@@ -216,7 +341,7 @@ kbd{
   transition:border-color .2s ease,color .2s ease,background .2s ease,transform .2s ease;
   user-select:none;
 }
-.step:hover{border-color:var(--ink);color:var(--ink);background:#fff;transform:translateY(-1px)}
+.step:hover{border-color:var(--ink);color:var(--ink);background:var(--raised);transform:translateY(-1px)}
 .step:active{transform:scale(.9)}
 .bar{height:3px;border-radius:3px;background:var(--soft);margin-top:16px;overflow:hidden}
 .bar span{
@@ -252,7 +377,7 @@ kbd{
 .stack span{
   display:block;height:100%;width:0;
   transition:width .7s var(--ease),filter .2s ease;
-  box-shadow:inset -1.5px 0 0 #fff;cursor:default;
+  box-shadow:inset -1.5px 0 0 var(--card);cursor:default;
 }
 .stack span:last-child{box-shadow:none}
 .stack span:hover{filter:brightness(1.08)}
@@ -294,7 +419,7 @@ kbd{
 .rail-pin{
   position:absolute;top:5px;left:0;width:11px;height:11px;margin-left:-5.5px;
   border-radius:50%;background:var(--accent);
-  box-shadow:0 0 0 3px #fff,0 0 0 4px rgba(177,47,95,.16);
+  box-shadow:0 0 0 3px var(--card),0 0 0 4px var(--pin-glow);
   transition:left .75s var(--ease);z-index:2;
 }
 .rail-stop{
@@ -343,7 +468,7 @@ kbd{
 .shield{display:block;width:21px;height:23px;flex-shrink:0}
 .shield svg{width:21px;height:23px;overflow:visible}
 .shield-body{
-  fill:#fff;stroke:var(--faint);stroke-opacity:.7;stroke-width:1.2;
+  fill:var(--card);stroke:var(--faint);stroke-opacity:.7;stroke-width:1.2;
   transition:fill .3s ease,stroke .3s ease,stroke-opacity .3s ease;
 }
 .shield-tick{
@@ -387,7 +512,7 @@ kbd{
   transition:height .5s var(--ease),background .3s ease;
 }
 .pip.on i{height:100%;background:var(--c,var(--accent))}
-.pip.today i{box-shadow:0 0 0 1px #fff,0 0 0 2.5px var(--line-strong)}
+.pip.today i{box-shadow:0 0 0 1px var(--card),0 0 0 2.5px var(--line-strong)}
 .pip:hover i{filter:brightness(.94)}
 
 .spark{height:34px;line-height:0}
@@ -401,7 +526,7 @@ kbd{
 .contrib-sub b{font-weight:400;color:var(--muted)}
 .legend{display:flex;align-items:center;gap:4px;font-size:9.5px;color:var(--muted);padding-top:2px}
 .legend em{font-style:normal;margin:0 3px;color:var(--faint)}
-.legend i{width:10px;height:10px;border-radius:2.5px;display:block;border:1px solid rgba(20,20,24,.04)}
+.legend i{width:10px;height:10px;border-radius:2.5px;display:block;border:1px solid var(--legend-line)}
 .graph{margin-top:16px;overflow-x:auto;overflow-y:hidden;padding-bottom:2px}
 .graph::-webkit-scrollbar{height:4px}
 .graph::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
@@ -422,7 +547,7 @@ kbd{
 @keyframes cellIn{from{opacity:0;transform:scale(.5)}to{opacity:1;transform:none}}
 .cell:hover{
   transform:scale(1.45);position:relative;z-index:3;
-  box-shadow:0 0 0 1.5px #fff,0 4px 12px -3px rgba(20,20,24,.3);
+  box-shadow:0 0 0 1.5px var(--card),0 4px 12px -3px var(--cell-shadow);
 }
 .cell.today{outline:1px solid var(--ink);outline-offset:1px}
 .cell.grace{position:relative}
@@ -498,7 +623,7 @@ kbd{
 .rv-rail .rv-target{position:absolute;bottom:3.5px;left:50%;width:1px;height:10px;background:var(--line-strong)}
 .rv-rail .rv-mark{
   position:absolute;bottom:5px;left:0;width:7px;height:7px;margin-left:-3.5px;
-  border-radius:50%;box-shadow:0 0 0 2px #fff;
+  border-radius:50%;box-shadow:0 0 0 2px var(--card);
   transition:left .5s var(--ease);
 }
 .rv-ring{width:22px;height:22px;display:block}
@@ -513,21 +638,26 @@ kbd{
   font-size:10.5px;color:var(--faint);
 }
 .foot-left,.foot-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.foot-note{display:flex;align-items:center;gap:8px}
+.foot-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .foot-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);display:block}
 .foot button{
   color:var(--muted);padding:2px 1px;border-bottom:1px solid transparent;
   transition:color .2s ease,border-color .2s ease;
 }
 .foot button:hover{color:var(--ink);border-bottom-color:var(--line-strong)}
+.foot button svg{width:11px;height:11px;display:inline-block;vertical-align:-1.5px;margin-right:4px}
 .foot .sep{color:var(--line-strong)}
 .foot kbd{font-size:8.5px;padding:1px 3px;min-width:14px}
+#installFoot[hidden] + .sep{display:none}
+@media(display-mode:standalone){#installFoot,#installFoot + .sep{display:none!important}}
 
 /* subject head control */
 .today-pill{
   display:flex;align-items:flex-end;gap:18px;
-  border:1px solid var(--line);border-radius:20px;background:#fff;
+  border:1px solid var(--line);border-radius:20px;background:var(--card);
   padding:13px 16px 12px;min-width:270px;
-  transition:border-color .3s ease,box-shadow .3s ease;
+  transition:border-color .3s ease,box-shadow .3s ease,background-color .3s ease;
 }
 .today-pill:hover{border-color:var(--line-strong);box-shadow:var(--shadow-hover)}
 .tp-copy{flex:1;min-width:0}
@@ -542,37 +672,37 @@ kbd{
 /* ── tooltip ───────────────────────────────────────────────── */
 .tip{
   position:fixed;z-index:600;pointer-events:none;
-  background:var(--ink);color:#fff;
+  background:var(--tip-bg);color:var(--tip-ink);
   padding:9px 11px;border-radius:9px;max-width:260px;
   font-size:11px;line-height:1.55;letter-spacing:.005em;font-weight:300;
   opacity:0;transform:translateY(4px) scale(.98);
   transition:opacity .14s ease,transform .14s ease;
-  box-shadow:0 18px 44px -16px rgba(20,20,24,.5);
+  box-shadow:var(--shadow-tip);
 }
 .tip.show{opacity:1;transform:none}
-.tip .tip-title{font-weight:500;font-size:11px;color:#fff;white-space:nowrap}
-.tip .tip-sub{color:#b9b9c4;margin-top:1px;white-space:nowrap}
+.tip .tip-title{font-weight:500;font-size:11px;color:var(--tip-ink);white-space:nowrap}
+.tip .tip-sub{color:var(--tip-sub);margin-top:1px;white-space:nowrap}
 .tip .tip-sub.wrap{white-space:normal;max-width:232px;line-height:1.45}
 .tip .tip-rows{display:flex;gap:9px;margin-top:5px;flex-wrap:wrap}
-.tip .tip-row{display:flex;align-items:center;gap:4px;color:#d7d7de;white-space:nowrap}
+.tip .tip-row{display:flex;align-items:center;gap:4px;color:var(--tip-row);white-space:nowrap}
 .tip .tip-row i{width:5px;height:5px;border-radius:50%;display:block}
-.tip .tip-hint{color:#878792;margin-top:5px;font-size:10px;white-space:nowrap}
+.tip .tip-hint{color:var(--tip-hint);margin-top:5px;font-size:10px;white-space:nowrap}
 
 /* ── backdrops, modal, editor ──────────────────────────────── */
 .backdrop{
   position:fixed;inset:0;z-index:300;padding:24px;
-  background:rgba(252,252,253,.66);
+  background:var(--backdrop);
   -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
   display:grid;place-items:center;
   opacity:0;pointer-events:none;transition:opacity .25s ease;
 }
 .backdrop.show{opacity:1;pointer-events:auto}
 .modal{
-  width:100%;max-width:430px;background:#fff;
+  width:100%;max-width:430px;background:var(--card);
   border:1px solid var(--line);border-radius:24px;padding:24px;
-  box-shadow:0 40px 100px -40px rgba(20,20,24,.4);
+  box-shadow:var(--shadow-modal);
   transform:translateY(10px) scale(.985);
-  transition:transform .32s var(--ease);
+  transition:transform .32s var(--ease),background-color .3s ease,border-color .3s ease;
 }
 .backdrop.show .modal{transform:none}
 .modal.wide{max-width:560px}
@@ -581,7 +711,7 @@ kbd{
 .btn.ghost.snap-btn{
   font-size:11.5px;color:var(--muted);padding:8px 13px;gap:7px;
 }
-.btn.ghost.snap-btn:hover{color:var(--ink);background:#fff;transform:none}
+.btn.ghost.snap-btn:hover{color:var(--ink);background:var(--raised);transform:none}
 .btn.ghost.snap-btn:active{transform:scale(.97)}
 .btn.ghost.snap-btn svg{width:14px;height:14px;opacity:.7}
 
@@ -600,7 +730,7 @@ kbd{
 .snap-preview img{
   display:block;width:100%;max-width:100%;max-height:calc(100vh - 220px);
   height:auto;border-radius:18px;background:var(--bg);
-  box-shadow:0 30px 60px -34px rgba(20,20,24,.5),0 0 0 1px rgba(20,20,24,.05);
+  box-shadow:var(--shadow-snap);
 }
 .snap-loading{
   font-size:11px;color:var(--faint);letter-spacing:.01em;
@@ -665,11 +795,11 @@ kbd{
 
 /* ── palette ───────────────────────────────────────────────── */
 .palette{
-  width:100%;max-width:560px;background:#fff;border:1px solid var(--line);
+  width:100%;max-width:560px;background:var(--card);border:1px solid var(--line);
   border-radius:20px;overflow:hidden;
-  box-shadow:0 40px 100px -40px rgba(20,20,24,.42);
+  box-shadow:var(--shadow-modal);
   transform:translateY(10px) scale(.985);
-  transition:transform .3s var(--ease);
+  transition:transform .3s var(--ease),background-color .3s ease,border-color .3s ease;
 }
 .backdrop.show .palette{transform:none}
 .pal-search{display:flex;align-items:center;gap:10px;padding:14px 17px;border-bottom:1px solid var(--line)}
@@ -692,12 +822,12 @@ kbd{
 .pal-item:hover,.pal-item.sel{background:var(--soft)}
 .pal-item.sel::before{content:'';position:absolute;left:0;top:9px;bottom:9px;width:2px;border-radius:2px;background:var(--accent)}
 .pal-ico{
-  width:26px;height:26px;border-radius:7px;background:#fff;border:1px solid var(--line);
+  width:26px;height:26px;border-radius:7px;background:var(--raised);border:1px solid var(--line);
   display:grid;place-items:center;color:var(--ink-2);flex-shrink:0;
-  transition:border-color .14s ease,color .14s ease;
+  transition:border-color .14s ease,color .14s ease,background .3s ease;
 }
 .pal-ico svg{width:14px;height:14px}
-.pal-item.sel .pal-ico{border-color:#f0d3de;color:var(--accent)}
+.pal-item.sel .pal-ico{border-color:var(--accent-line);color:var(--accent)}
 .pal-label{flex:1;font-size:12.5px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pal-kbd{flex-shrink:0}
 .pal-empty{padding:24px 10px;text-align:center;font-size:12px;color:var(--faint)}
@@ -716,6 +846,41 @@ kbd{
 .help-row .keys{display:flex;gap:3px;flex-shrink:0}
 .help-note{margin-top:16px;font-size:10.5px;color:var(--faint);line-height:1.6}
 
+/* install sheet */
+.install-modal{
+  max-width:430px;
+  max-height:calc(100vh - 48px);
+  max-height:calc(100dvh - 48px);
+  overflow-y:auto;overscroll-behavior:contain;
+}
+.install-lead-row{display:flex;align-items:flex-start;gap:12px}
+.install-glyph{
+  width:34px;height:34px;border-radius:10px;flex-shrink:0;
+  background:var(--soft);border:1px solid var(--line);
+  display:grid;place-items:center;color:var(--accent);
+}
+.install-glyph svg{width:16px;height:16px}
+.install-kicker{font-size:9px;font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--faint);margin-bottom:4px}
+.install-lead{font-size:12.5px;color:var(--muted);line-height:1.6}
+.install-steps{list-style:none;margin:15px 0 0;padding:0}
+.install-step{
+  display:flex;gap:11px;padding:10px 0;border-top:1px solid var(--line-soft);
+  font-size:12px;line-height:1.55;color:var(--ink-2);
+}
+.install-step:first-child{border-top:0}
+.install-step-n{
+  width:18px;height:18px;border-radius:50%;flex-shrink:0;margin-top:1px;
+  background:var(--soft);color:var(--muted);
+  font-size:9.5px;display:grid;place-items:center;
+}
+.install-step b{font-weight:400;color:var(--ink)}
+.install-note{margin-top:13px;font-size:10.5px;color:var(--faint);line-height:1.6}
+.install-foot{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  margin-top:16px;padding-top:15px;border-top:1px solid var(--line);
+}
+.install-meta{font-size:9.5px;color:var(--faint);letter-spacing:.02em}
+
 /* ── toasts ────────────────────────────────────────────────── */
 .toasts{
   position:fixed;left:50%;bottom:22px;transform:translateX(-50%);
@@ -724,14 +889,14 @@ kbd{
 }
 .toast{
   pointer-events:auto;display:flex;align-items:center;gap:9px;
-  background:var(--ink);color:#fff;font-size:11.5px;font-weight:300;
+  background:var(--tip-bg);color:var(--tip-ink);font-size:11.5px;font-weight:300;
   padding:10px 15px;border-radius:999px;
-  box-shadow:0 18px 40px -18px rgba(20,20,24,.55);
+  box-shadow:var(--shadow-toast);
   animation:toastIn .3s var(--ease);
 }
 .toast.out{animation:toastOut .22s ease forwards}
-.toast svg{width:13px;height:13px;color:#d7d7de;flex-shrink:0}
-.toast b{font-weight:400;color:#fff}
+.toast svg{width:13px;height:13px;color:var(--tip-row);flex-shrink:0}
+.toast b{font-weight:400;color:var(--tip-ink)}
 .toast button{
   font-size:10.5px;font-weight:500;color:#ffd7e6;background:rgba(255,255,255,.1);
   padding:4px 9px;border-radius:999px;margin-left:3px;
@@ -778,6 +943,10 @@ kbd{
   .pal-list{max-height:none;flex:1;overflow-y:auto}
   .topbar-right .save-state{display:none}
   .foot{margin-top:32px}
+  .foot .sep{display:none}
+  .foot-left,.foot-right{gap:6px 14px}
+  .foot-left{flex-direction:column;align-items:flex-start;gap:8px}
+  .foot-actions{gap:6px 14px}
   .snapshot-modal{padding:14px;gap:11px}
   .snap-preview img{max-height:calc(100vh - 240px)}
   .snap-actions{width:100%;margin-left:0}
@@ -785,6 +954,8 @@ kbd{
   .snap-meta{order:2;width:100%;text-align:center}
   .view-head{gap:16px}
   .snap-btn{width:100%;justify-content:center}
+  .install-foot{flex-wrap:wrap}
+  .install-meta{order:2}
 }
 @media(max-width:360px){
   .snap-actions{flex-wrap:wrap}
@@ -802,7 +973,7 @@ kbd{
   <div class="topbar-inner">
     <button class="brand" id="brand" aria-label="JEE Tracker — overview">
       <svg class="brand-mark" viewBox="0 0 20 20" aria-hidden="true">
-        <rect width="20" height="20" rx="6" fill="#B12F5F"/>
+        <rect width="20" height="20" rx="6" style="fill:var(--accent)"/>
         <rect x="5" y="9.2" width="2.8" height="5.8" rx="1.1" fill="#fff" opacity=".5"/>
         <rect x="8.6" y="5" width="2.8" height="10" rx="1.1" fill="#fff"/>
         <rect x="12.2" y="7.4" width="2.8" height="7.6" rx="1.1" fill="#fff" opacity=".72"/>
@@ -813,6 +984,19 @@ kbd{
     <nav class="nav" id="nav" aria-label="Views"></nav>
 
     <div class="topbar-right">
+      <button class="theme-btn" id="themeBtn" type="button" aria-label="Switch to dark theme" aria-pressed="false" title="Switch to dark theme">
+        <span class="theme-ico sun" aria-hidden="true">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round">
+            <circle cx="8" cy="8" r="3.1"/>
+            <path d="M8 1.4v1.5M8 13.1v1.5M1.4 8h1.5M13.1 8h1.5M3.3 3.3l1.1 1.1M11.6 11.6l1.1 1.1M12.7 3.3l-1.1 1.1M4.4 11.6l-1.1 1.1"/>
+          </svg>
+        </span>
+        <span class="theme-ico moon" aria-hidden="true">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M13.4 9.6A5.7 5.7 0 0 1 6.4 2.6a5.7 5.7 0 1 0 7 7Z"/>
+          </svg>
+        </span>
+      </button>
       <button class="cmdk-btn" id="cmdkBtn" aria-label="Open command palette">
         <kbd>⌘</kbd><kbd>K</kbd>
       </button>
@@ -830,14 +1014,28 @@ kbd{
 
   <footer class="foot">
     <span class="foot-left">
-      <i class="foot-dot"></i>
-      <span>Stored in this browser</span>
+      <span class="foot-note"><i class="foot-dot"></i><span>Stored in this browser</span></span>
       <span class="sep">·</span>
-      <button data-act="export">Export</button>
-      <span class="sep">·</span>
-      <button data-act="import">Import</button>
+      <span class="foot-actions">
+        <button data-act="export-csv">Export CSV</button>
+        <span class="sep">·</span>
+        <button data-act="import-csv">Import CSV</button>
+        <span class="sep">·</span>
+        <button data-act="export">Backup JSON</button>
+        <span class="sep">·</span>
+        <button data-act="import">Restore JSON</button>
+      </span>
     </span>
     <span class="foot-right">
+      <button data-act="install" id="installFoot" aria-haspopup="dialog" aria-controls="installBackdrop">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="2.5" y="1.8" width="11" height="12.4" rx="2.2"/>
+          <path d="M6.5 11.8h3"/>
+          <path d="M8 4.2v4.4M6.2 6.8L8 8.6l1.8-1.8"/>
+        </svg>
+        Install app
+      </button>
+      <span class="sep">·</span>
       <button data-act="shortcuts"><kbd>?</kbd> Shortcuts</button>
       <span class="sep">·</span>
       <button data-act="palette"><kbd>⌘K</kbd> Commands</button>
@@ -902,6 +1100,39 @@ kbd{
   </div>
 </div>
 
+<div class="backdrop" id="installBackdrop">
+  <div class="modal install-modal" role="dialog" aria-modal="true" aria-labelledby="installTitle" aria-describedby="installLead">
+    <div class="ed-head">
+      <div>
+        <p class="eyebrow">Install</p>
+        <h2 class="ed-title" id="installTitle">Keep the ledger close</h2>
+      </div>
+      <button class="xbtn" id="installClose" aria-label="Close install instructions">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M1 1l10 10M11 1L1 11"/></svg>
+      </button>
+    </div>
+    <div class="install-lead-row">
+      <span class="install-glyph" aria-hidden="true">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2.5" y="1.8" width="11" height="12.4" rx="2.2"/>
+          <path d="M6.5 11.8h3"/>
+          <path d="M8 4.2v4.4M6.2 6.8L8 8.6l1.8-1.8"/>
+        </svg>
+      </span>
+      <div>
+        <p class="install-kicker" id="installKicker"></p>
+        <p class="install-lead" id="installLead"></p>
+      </div>
+    </div>
+    <ol class="install-steps" id="installSteps"></ol>
+    <p class="install-note" id="installNote"></p>
+    <div class="install-foot">
+      <span class="install-meta">Local data · works offline</span>
+      <button class="btn done" id="installDone">Got it</button>
+    </div>
+  </div>
+</div>
+
 <div class="backdrop" id="snapshotBackdrop">
   <div class="modal snapshot-modal" role="dialog" aria-modal="true" aria-labelledby="snapTitle" aria-describedby="snapDesc">
     <div class="snap-head">
@@ -931,6 +1162,7 @@ kbd{
 
 <div class="toasts" id="toasts" aria-live="polite" aria-atomic="false"></div>
 <input type="file" id="fileInput" accept="application/json,.json" hidden>
+<input type="file" id="csvInput" accept=".csv,text/csv" hidden>
 
 <script>
 (function () {
@@ -951,10 +1183,21 @@ kbd{
   const TARGETS = { m: 40, p: 30, c: 30 };
   const GOAL = 100;
   const SHADES = [0.26, 0.50, 0.75, 1];
-  const EMPTY = '#f3f3f6';
-  const ACCENT = (getComputedStyle(document.documentElement).getPropertyValue('--accent') || '').trim() || '#b12f5f';
-  const ACCENT_SOFT = (getComputedStyle(document.documentElement).getPropertyValue('--accent-soft') || '').trim() || '#fbebf1';
   const CELL = 16;                 // 13px cell + 3px gap
+
+  const THEME_KEY = 'jee-tracker.theme';
+  const THEME_PARAM = new URLSearchParams(location.search).get('theme');
+  let themeMode = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+
+  function cssVar(name, fallback) {
+    const v = (getComputedStyle(document.documentElement).getPropertyValue(name) || '').trim();
+    return v || fallback;
+  }
+
+  let ACCENT = cssVar('--accent', '#b12f5f');
+  let ACCENT_SOFT = cssVar('--accent-soft', '#fbebf1');
+  let EMPTY = cssVar('--heat-empty', '#f3f3f6');
+  let SURFACE = cssVar('--card', '#ffffff');
 
   const STORE_KEY = 'jee-tracker.v2';
   const LEGACY_KEY = 'jee-tracker.v1';
@@ -1508,7 +1751,7 @@ kbd{
 
     const rows = '<div class="tip-rows">' +
       '<span class="tip-row"><i style="background:' + color + '"></i>this week ' + fmt1(thisAvg) + '</span>' +
-      (hasPrior ? '<span class="tip-row"><i style="background:#878792"></i>last week ' + fmt1(prevAvg) + '</span>' : '') +
+      (hasPrior ? '<span class="tip-row"><i style="background:var(--tip-dot-muted)"></i>last week ' + fmt1(prevAvg) + '</span>' : '') +
       '</div>';
 
     if (!hasPrior) {
@@ -1536,7 +1779,7 @@ kbd{
       '<div class="tip-sub">' + ins.bank + ' of 2 banked</div>' +
       '<div class="tip-rows">' +
         '<span class="tip-row"><i style="background:' + ACCENT + '"></i>' + ins.earned + ' earned</span>' +
-        '<span class="tip-row"><i style="background:#878792"></i>' + ins.used + ' used</span>' +
+        '<span class="tip-row"><i style="background:var(--tip-dot-muted)"></i>' + ins.used + ' used</span>' +
       '</div>';
     const covered = Object.keys(ins.covered).sort().slice(-3);
     if (covered.length) {
@@ -1674,12 +1917,36 @@ kbd{
   function fmt1(n) { return NF1.format(n); }
   function plural(n, word) { return n + ' ' + word + (n === 1 ? '' : 's'); }
 
+  function colorChannels(hex) {
+    const h = String(hex).trim();
+    if (h.charAt(0) !== '#' || (h.length !== 7 && h.length !== 4)) {
+      return { r: 255, g: 255, b: 255 };
+    }
+    if (h.length === 4) {
+      return {
+        r: parseInt(h.charAt(1) + h.charAt(1), 16),
+        g: parseInt(h.charAt(2) + h.charAt(2), 16),
+        b: parseInt(h.charAt(3) + h.charAt(3), 16)
+      };
+    }
+    return {
+      r: parseInt(h.slice(1, 3), 16),
+      g: parseInt(h.slice(3, 5), 16),
+      b: parseInt(h.slice(5, 7), 16)
+    };
+  }
+
+  /* Blend a hue into a surface. In light this is the original mix over white;
+     in dark it ramps up from the card surface so cells never turn pastel. */
+  function mixToward(hex, t, from) {
+    const a = colorChannels(from);
+    const b = colorChannels(hex);
+    const f = function (v, s) { return Math.round(s + (v - s) * t); };
+    return 'rgb(' + f(b.r, a.r) + ',' + f(b.g, a.g) + ',' + f(b.b, a.b) + ')';
+  }
+
   function mix(hex, t) {
-    const r = parseInt(hex.slice(1, 3), 16);
-    const g = parseInt(hex.slice(3, 5), 16);
-    const b = parseInt(hex.slice(5, 7), 16);
-    const f = function (v) { return Math.round(255 - (255 - v) * t); };
-    return 'rgb(' + f(r) + ',' + f(g) + ',' + f(b) + ')';
+    return mixToward(hex, t, SURFACE);
   }
 
   function levelFor(value, target) {
@@ -1694,6 +1961,92 @@ kbd{
   function heatColor(base, value, target) {
     const lvl = levelFor(value, target);
     return lvl < 0 ? EMPTY : mix(base, SHADES[lvl]);
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     THEME
+  ══════════════════════════════════════════════════════════ */
+  function hasSavedTheme() {
+    try {
+      const v = localStorage.getItem(THEME_KEY);
+      return v === 'dark' || v === 'light';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function syncThemeTokens() {
+    ACCENT = cssVar('--accent', '#b12f5f');
+    ACCENT_SOFT = cssVar('--accent-soft', '#fbebf1');
+    EMPTY = cssVar('--heat-empty', themeMode === 'dark' ? '#24242d' : '#f3f3f6');
+    SURFACE = cssVar('--card', themeMode === 'dark' ? '#16161c' : '#ffffff');
+  }
+
+  function updateThemeButton() {
+    const btn = document.getElementById('themeBtn');
+    if (!btn) return;
+    const label = themeMode === 'dark' ? 'Switch to light theme' : 'Switch to dark theme';
+    btn.setAttribute('aria-label', label);
+    btn.setAttribute('title', label);
+    btn.setAttribute('aria-pressed', themeMode === 'dark' ? 'true' : 'false');
+  }
+
+  function refreshLegends() {
+    $$('.contrib').forEach(function (card) {
+      const graph = card.querySelector('[data-graph]');
+      const legend = card.querySelector('[data-legend]');
+      if (!graph || !legend) return;
+      const gid = graph.dataset.graph || 'all';
+      let base = ACCENT;
+      if (gid.indexOf('subject-') === 0) {
+        const s = SUBJ[gid.slice(8)];
+        if (s) base = s.color;
+      }
+      legend.innerHTML = legendHTML(base);
+    });
+  }
+
+  function paintTheme() {
+    syncThemeTokens();
+    updateThemeButton();
+    refreshLegends();
+    $$('.graph[data-graph]').forEach(function (graph) {
+      if (!graph._cells) return;
+      graph._cells.forEach(function (c) { if (c.el) c.el.dataset.c = ''; });
+      graph._painted = false;
+    });
+    render();
+    if (snapshotBackdrop.classList.contains('show')) renderSnapshot();
+  }
+
+  function applyTheme(theme, persist) {
+    themeMode = theme === 'dark' ? 'dark' : 'light';
+    const root = document.documentElement;
+    root.setAttribute('data-theme', themeMode);
+    root.style.colorScheme = themeMode;
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', themeMode === 'dark' ? '#0f0f13' : '#fcfcfd');
+    if (persist) {
+      try { localStorage.setItem(THEME_KEY, themeMode); } catch (e) { /* private mode */ }
+    }
+    paintTheme();
+  }
+
+  function toggleTheme() {
+    applyTheme(themeMode === 'dark' ? 'light' : 'dark', true);
+  }
+
+  function initThemeWatcher() {
+    updateThemeButton();
+    if (THEME_PARAM === 'dark' || THEME_PARAM === 'light') return;
+    if (!window.matchMedia) return;
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const onChange = function (e) {
+      if (hasSavedTheme()) return;
+      applyTheme(e.matches ? 'dark' : 'light', false);
+    };
+    if (mq.addEventListener) mq.addEventListener('change', onChange);
+    else if (mq.addListener) mq.addListener(onChange);
   }
 
   /* ══════════════════════════════════════════════════════════
@@ -1795,6 +2148,7 @@ kbd{
       if (b) switchView(b.dataset.view);
     });
     document.getElementById('brand').addEventListener('click', function () { switchView('overview'); });
+    document.getElementById('themeBtn').addEventListener('click', toggleTheme);
 
     window.addEventListener('scroll', function () {
       document.getElementById('topbar').classList.toggle('scrolled', window.scrollY > 8);
@@ -2785,6 +3139,7 @@ kbd{
     closePalette();
     closeHelp();
     closeSnapshot(true);
+    closeInstall(true);
     editingKey = key;
     const d = parseKey(key);
     edRelative.textContent = key === TKEY ? 'Today' :
@@ -2880,9 +3235,12 @@ kbd{
     calendar: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><rect x="2" y="3.5" width="12" height="10.5" rx="2"/><path d="M2 6.5h12M5 1.8v2.8M11 1.8v2.8"/></svg>',
     download: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v8M4.5 7.2L8 10.7l3.5-3.5M2.5 13.5h11"/></svg>',
     upload: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M8 11.5V3.5M4.5 6.8L8 3.3l3.5 3.5M2.5 13.5h11"/></svg>',
+    sheet: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2.5" width="12" height="11" rx="2"/><path d="M2 6.2h12M6.2 6.2v7.3M9.8 6.2v7.3"/></svg>',
     image: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2.5" width="12" height="11" rx="2.4"/><circle cx="5.7" cy="6.1" r="1.15"/><path d="M2.6 11.4l3.3-3.3 2.5 2.5 2-2 3 3"/></svg>',
     trash: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4.5h11M6 4.5V3h4v1.5M4 4.5l.7 9h6.6l.7-9M6.5 7v4M9.5 7v4"/></svg>',
-    keyboard: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><rect x="1.5" y="4" width="13" height="8" rx="2"/><path d="M4 6.5h1M7 6.5h1M10 6.5h1M4 9h1M7 9h2M10 9h2"/></svg>'
+    keyboard: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><rect x="1.5" y="4" width="13" height="8" rx="2"/><path d="M4 6.5h1M7 6.5h1M10 6.5h1M4 9h1M7 9h2M10 9h2"/></svg>',
+    theme: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="8" cy="8" r="3.1"/><path d="M8 1.6v1.4M8 13v1.4M1.6 8h1.4M13 8h1.4M3.4 3.4l1 1M11.6 11.6l1 1M12.6 3.4l-1 1M4.4 11.6l-1 1"/></svg>',
+    install: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="1.8" width="11" height="12.4" rx="2.2"/><path d="M6.5 11.8h3"/><path d="M8 4.2v4.4M6.2 6.8L8 8.6l1.8-1.8"/></svg>'
   };
 
   function subjectIcon(s) {
@@ -2901,7 +3259,11 @@ kbd{
     { group: 'Share', label: 'Create weekly snapshot', kbd: 'W', icon: ICONS.image, run: openSnapshot },
     { group: 'Data', label: 'Export data as JSON', icon: ICONS.download, run: exportData },
     { group: 'Data', label: 'Import data from JSON', icon: ICONS.upload, run: function () { document.getElementById('fileInput').click(); } },
+    { group: 'Data', label: 'Export CSV', kbd: 'E', icon: ICONS.sheet, run: exportCSV },
+    { group: 'Data', label: 'Import CSV', kbd: '⇧E', icon: ICONS.sheet, run: function () { document.getElementById('csvInput').click(); } },
     { group: 'Data', label: 'Clear all data', icon: ICONS.trash, run: clearAll },
+    { group: 'Preferences', label: 'Toggle dark theme', kbd: 'D', icon: ICONS.theme, run: toggleTheme },
+    { group: 'App', label: 'Install app', kbd: 'I', icon: ICONS.install, run: openInstall },
     { group: 'Help', label: 'Keyboard shortcuts', kbd: '?', icon: ICONS.keyboard, run: openHelp }
   ];
 
@@ -2958,6 +3320,7 @@ kbd{
     closeEditor();
     closeHelp();
     closeSnapshot(true);
+    closeInstall(true);
     paletteBackdrop.classList.add('show');
     lockScroll(true);
     palInput.value = '';
@@ -3020,8 +3383,12 @@ kbd{
     ['Remove a question', ['⇧', 'M / P / C']],
     ['Open today’s log', ['T']],
     ['Create a weekly snapshot', ['W']],
+    ['Export CSV', ['E']],
+    ['Import CSV', ['⇧', 'E']],
     ['Command palette', ['⌘', 'K']],
     ['Undo last change', ['⌘', 'Z']],
+    ['Toggle dark theme', ['D']],
+    ['Install app', ['I']],
     ['Keyboard shortcuts', ['?']],
     ['Close anything', ['esc']]
   ];
@@ -3031,6 +3398,7 @@ kbd{
     closeEditor();
     closePalette();
     closeSnapshot(true);
+    closeInstall(true);
     document.getElementById('helpGrid').innerHTML = HELP_ROWS.map(function (r) {
       return '<div class="help-row"><span>' + r[0] + '</span><span class="keys">' +
         r[1].map(function (k) { return '<kbd>' + k + '</kbd>'; }).join('') + '</span></div>';
@@ -3046,6 +3414,279 @@ kbd{
 
   document.getElementById('helpClose').addEventListener('click', closeHelp);
   helpBackdrop.addEventListener('click', function (e) { if (e.target === helpBackdrop) closeHelp(); });
+
+  /* ══════════════════════════════════════════════════════════
+     INSTALL — a native prompt when offered, quiet instructions
+     when it is not. The app itself never depends on installation.
+  ══════════════════════════════════════════════════════════ */
+  const installBackdrop = document.getElementById('installBackdrop');
+  const installFoot = document.getElementById('installFoot');
+  const installKicker = document.getElementById('installKicker');
+  const installLead = document.getElementById('installLead');
+  const installSteps = document.getElementById('installSteps');
+  const installNote = document.getElementById('installNote');
+  const installClose = document.getElementById('installClose');
+
+  let deferredInstallPrompt = null;
+  let installReturnFocus = null;
+  let appInstalled = false;
+
+  function isStandaloneApp() {
+    try {
+      if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) return true;
+    } catch (e) { /* older browsers */ }
+    return navigator.standalone === true;
+  }
+
+  function installContextOk() {
+    return location.protocol === 'https:' ||
+      location.hostname === 'localhost' ||
+      location.hostname === '127.0.0.1' ||
+      location.hostname === '[::1]';
+  }
+
+  function setInstallVisibility() {
+    if (!installFoot) return;
+    installFoot.hidden = appInstalled || isStandaloneApp() || !installContextOk();
+  }
+
+  function installPlatform() {
+    const ua = navigator.userAgent || '';
+    const iPadOS = /iPad/.test(ua) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const iOS = iPadOS || /iPhone|iPod/.test(ua);
+    const edge = /Edg\//.test(ua);
+    const chromium = /Chrome\/|Chromium\/|Edg\//.test(ua);
+    const firefox = /Firefox\//.test(ua);
+    const safari = /Safari\//.test(ua) && !chromium && !/CriOS|FxiOS|EdgiOS/.test(ua);
+    const mac = /Macintosh/.test(ua) && !iPadOS;
+    const win = /Windows/.test(ua);
+    const linux = /Linux/.test(ua) && !/Android/.test(ua);
+    const iosBrowser = /CriOS/.test(ua) ? 'Chrome' :
+      /FxiOS/.test(ua) ? 'Firefox' :
+      /EdgiOS/.test(ua) ? 'Edge' : 'Safari';
+    const safariVersion = Number((ua.match(/Version\/(\d+)/) || [])[1] || 0);
+
+    if (iOS) {
+      return {
+        platform: (iPadOS ? 'iPadOS' : 'iOS') + ' · ' + iosBrowser,
+        lead: iosBrowser === 'Safari'
+          ? 'Safari keeps it in the share sheet. Add it once and it opens like an app.'
+          : 'Open this page in Safari first — that is where iOS adds web apps.',
+        steps: iosBrowser === 'Safari'
+          ? ['Tap <b>Share</b> in Safari’s toolbar.', 'Choose <b>Add to Home Screen</b>.', 'Tap <b>Add</b>.']
+          : ['Copy this page’s address.', 'Open it in <b>Safari</b>.', 'Share → <b>Add to Home Screen</b>.'],
+        note: 'It opens without browser chrome and keeps working offline. Your questions never leave this device.'
+      };
+    }
+
+    if (mac && safari) {
+      const modern = safariVersion >= 17 || safariVersion === 0;
+      return {
+        platform: 'macOS · Safari',
+        lead: modern
+          ? 'Safari 17 and later can keep JEE Tracker in the Dock.'
+          : 'This Safari is older than 17. Use Chrome or Edge for a one-click install.',
+        steps: modern
+          ? ['Open the <b>File</b> menu.', 'Choose <b>Add to Dock</b>.', 'Name it JEE Tracker and click <b>Add</b>.']
+          : ['Open this page in <b>Chrome</b> or <b>Edge</b>.', 'Open the browser menu.', 'Choose <b>Install JEE Tracker</b>.'],
+        note: 'The Dock icon opens the app without browser chrome; the cached copy stays available offline.'
+      };
+    }
+
+    if (firefox) {
+      return {
+        platform: 'Firefox',
+        lead: 'Firefox does not install web apps on the desktop. Chrome or Edge will give it a real app window.',
+        steps: ['Open this page in <b>Chrome</b> or <b>Edge</b>.', 'Use the install icon in the address bar, or open the browser menu.', 'Confirm <b>Install</b>.'],
+        note: 'The tab still works as usual, and your questions stay in this browser.'
+      };
+    }
+
+    if (chromium || win || mac) {
+      return {
+        platform: win ? (edge ? 'Windows · Edge' : 'Windows · Chrome') :
+          mac ? (edge ? 'macOS · Edge' : 'macOS · Chrome') :
+          linux ? (edge ? 'Linux · Edge' : 'Linux · Chrome') :
+          (edge ? 'Chromium · Edge' : 'Chromium'),
+        lead: 'The browser can install it in a moment. Look for the install icon in the address bar, or use the menu.',
+        steps: [
+          'Open the browser menu.',
+          edge
+            ? 'Choose <b>Apps → Install this site as an app</b>.'
+            : 'Choose <b>Install JEE Tracker</b> (or <b>Cast, save, and share → Install page as app</b>).',
+          'Confirm <b>Install</b>.'
+        ],
+        note: 'Once installed it gets its own window, a home-screen icon, and an offline copy. Press I again if the browser offers its own prompt.'
+      };
+    }
+
+    return {
+      platform: 'Browser',
+      lead: 'Most browsers can keep this page as an app.',
+      steps: [
+        'Open the browser menu.',
+        'Choose <b>Install app</b>, <b>Install this site as an app</b>, or <b>Add to Home Screen</b>.',
+        'Confirm.'
+      ],
+      note: 'If your browser has no install option, it still works as a normal tab — all data stays local.'
+    };
+  }
+
+  function openInstallSheet() {
+    const active = document.activeElement;
+    installReturnFocus = (active && active !== document.body &&
+      !active.closest('.backdrop') && active.offsetParent !== null) ? active : null;
+
+    hideTip();
+    closeEditor();
+    closePalette();
+    closeHelp();
+    closeSnapshot(true);
+
+    const info = installPlatform();
+    installKicker.textContent = info.platform;
+    installLead.textContent = info.lead;
+    installSteps.innerHTML = info.steps.map(function (step, i) {
+      return '<li class="install-step"><span class="install-step-n">' + (i + 1) + '</span><span>' + step + '</span></li>';
+    }).join('');
+    installNote.textContent = info.note;
+
+    installBackdrop.classList.add('show');
+    lockScroll(true);
+    setTimeout(function () {
+      if (installBackdrop.classList.contains('show')) installClose.focus();
+    }, 50);
+  }
+
+  function openInstall() {
+    if (appInstalled || isStandaloneApp()) { toast('Already installed'); return; }
+    if (!installContextOk()) { toast('Install from the live site'); return; }
+
+    if (deferredInstallPrompt) {
+      const evt = deferredInstallPrompt;
+      deferredInstallPrompt = null;
+      try {
+        evt.prompt();
+      } catch (err) {
+        openInstallSheet();
+        return;
+      }
+      if (evt.userChoice && evt.userChoice.then) {
+        evt.userChoice.then(function (choice) {
+          if (choice && choice.outcome === 'accepted') {
+            appInstalled = true;
+            setInstallVisibility();
+          }
+        }).catch(function () { /* the browser dismissed the prompt */ });
+      }
+      return;
+    }
+
+    openInstallSheet();
+  }
+
+  function closeInstall(skipFocus) {
+    if (!installBackdrop.classList.contains('show')) return;
+    installBackdrop.classList.remove('show');
+
+    let target = installReturnFocus;
+    installReturnFocus = null;
+    if (target) {
+      const wrap = target.closest('.backdrop');
+      if (!document.contains(target) || target.offsetParent === null ||
+          (wrap && !wrap.classList.contains('show'))) {
+        target = null;
+      }
+    }
+    if (!target) {
+      target = (installFoot && !installFoot.hidden ? installFoot : null) ||
+        $('.nav-item.active') || document.getElementById('brand');
+    }
+
+    lockScroll(false);
+    if (!skipFocus && target && typeof target.focus === 'function') {
+      setTimeout(function () { target.focus(); }, 0);
+    }
+  }
+
+  function registerServiceWorker() {
+    if (!('serviceWorker' in navigator)) return;
+    if (!installContextOk()) return;
+
+    const register = function () {
+      navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(function () {
+        /* installation is a bonus; the app works from the tab */
+      });
+    };
+    if (document.readyState === 'complete') register();
+    else window.addEventListener('load', register);
+  }
+
+  function initPWA() {
+    setInstallVisibility();
+
+    window.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      setInstallVisibility();
+    });
+
+    window.addEventListener('appinstalled', function () {
+      appInstalled = true;
+      deferredInstallPrompt = null;
+      setInstallVisibility();
+      closeInstall(true);
+      toast('Installed');
+    });
+
+    if (window.matchMedia) {
+      const mq = window.matchMedia('(display-mode: standalone)');
+      const onChange = function () { setInstallVisibility(); };
+      if (mq.addEventListener) mq.addEventListener('change', onChange);
+      else if (mq.addListener) mq.addListener(onChange);
+    }
+
+    registerServiceWorker();
+  }
+
+  function handleLaunchAction() {
+    let action = '';
+    try { action = new URLSearchParams(location.search).get('action') || ''; } catch (e) { return; }
+
+    if (action) {
+      try {
+        const url = new URL(location.href);
+        url.searchParams.delete('action');
+        const qs = url.searchParams.toString();
+        history.replaceState(null, '', url.pathname + (qs ? '?' + qs : '') + url.hash);
+      } catch (e) { /* file:// and older browsers */ }
+    }
+
+    if (action === 'today') setTimeout(function () { openEditor(TKEY); }, 80);
+    else if (action === 'snapshot') setTimeout(openSnapshot, 80);
+  }
+
+  document.getElementById('installClose').addEventListener('click', function () { closeInstall(); });
+  document.getElementById('installDone').addEventListener('click', function () { closeInstall(); });
+  installBackdrop.addEventListener('click', function (e) {
+    if (e.target === installBackdrop) closeInstall();
+  });
+  installBackdrop.addEventListener('keydown', function (e) {
+    if (e.key !== 'Tab') return;
+    const focusables = $$('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])', installBackdrop)
+      .filter(function (el) { return !el.hidden && !el.disabled && el.offsetParent !== null; });
+    if (!focusables.length) return;
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  });
 
   /* ══════════════════════════════════════════════════════════
      WEEKLY SNAPSHOT — a 9:16 canvas share card
@@ -3113,9 +3754,31 @@ kbd{
     return total;
   }
 
-  function snapLine(ctx, x1, y, x2) {
+  function snapPalette() {
+    return {
+      bg: cssVar('--bg', '#fcfcfd'),
+      card: cssVar('--card', '#ffffff'),
+      ink: cssVar('--ink', '#141418'),
+      ink2: cssVar('--ink-2', '#3f3f49'),
+      muted: cssVar('--muted', '#72727d'),
+      faint: cssVar('--faint', '#9c9ca7'),
+      line: cssVar('--line', '#eaeaef'),
+      lineStrong: cssVar('--line-strong', '#dedee5'),
+      soft: cssVar('--soft', '#f5f5f8'),
+      empty: cssVar('--heat-empty', '#f3f3f6'),
+      accent: cssVar('--accent', '#b12f5f'),
+      accentInk: cssVar('--accent-ink', '#8e2449'),
+      accentSoft: cssVar('--accent-soft', '#fbebf1'),
+      wash: themeMode === 'dark'
+        ? ['rgba(212,84,128,.12)', 'rgba(212,84,128,0)']
+        : ['rgba(177,47,95,.075)', 'rgba(177,47,95,0)'],
+      todayRing: themeMode === 'dark' ? 'rgba(212,84,128,.62)' : 'rgba(177,47,95,.55)'
+    };
+  }
+
+  function snapLine(ctx, x1, y, x2, color) {
     ctx.save();
-    ctx.strokeStyle = '#eaeaef';
+    ctx.strokeStyle = color || '#eaeaef';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
     ctx.moveTo(x1, y + 0.75);
@@ -3137,11 +3800,11 @@ kbd{
     ctx.closePath();
   }
 
-  function snapShield(ctx, x, y, w, h, filled) {
+  function snapShield(ctx, x, y, w, h, filled, pal) {
     snapShieldPath(ctx, x, y, w, h);
-    ctx.fillStyle = filled ? ACCENT : '#ffffff';
+    ctx.fillStyle = filled ? pal.accent : pal.card;
     ctx.fill();
-    ctx.strokeStyle = filled ? ACCENT : '#dedee5';
+    ctx.strokeStyle = filled ? pal.accent : pal.lineStrong;
     ctx.lineWidth = 1.6;
     ctx.stroke();
     if (!filled) return;
@@ -3163,6 +3826,7 @@ kbd{
   function drawWeekCard(ctx, sum) {
     const W = SNAP_W, H = SNAP_H, M = SNAP_M, R = W - M;
     const CW = R - M;
+    const P = snapPalette();
     const week = sum.last7;
     const target = GOAL * 7;
     const diff = sum.weekSum - target;
@@ -3174,19 +3838,19 @@ kbd{
 
     ctx.textBaseline = 'alphabetic';
     ctx.textAlign = 'left';
-    ctx.fillStyle = '#fcfcfd';
+    ctx.fillStyle = P.bg;
     ctx.fillRect(0, 0, W, H);
 
     /* a single restrained accent wash, top right */
     const wash = ctx.createRadialGradient(R - 40, -120, 30, R - 40, -120, 960);
-    wash.addColorStop(0, 'rgba(177,47,95,.075)');
-    wash.addColorStop(1, 'rgba(177,47,95,0)');
+    wash.addColorStop(0, P.wash[0]);
+    wash.addColorStop(1, P.wash[1]);
     ctx.fillStyle = wash;
     ctx.fillRect(0, 0, W, 760);
 
     /* ── brand ─────────────────────────────────────────────── */
     snapRound(ctx, M, 82, 46, 46, 14);
-    ctx.fillStyle = ACCENT;
+    ctx.fillStyle = P.accent;
     ctx.fill();
 
     const ts = 46 / 20;
@@ -3203,39 +3867,39 @@ kbd{
     ctx.globalAlpha = 1;
 
     ctx.font = '500 23px ' + SNAP_SANS;
-    ctx.fillStyle = '#141418';
+    ctx.fillStyle = P.ink;
     ctx.fillText('JEE', M + 60, 116);
     const wordW = ctx.measureText('JEE').width;
     ctx.font = '300 23px ' + SNAP_SANS;
-    ctx.fillStyle = '#72727d';
+    ctx.fillStyle = P.muted;
     ctx.fillText('Tracker', M + 60 + wordW + 6, 116);
 
     ctx.font = '500 16px ' + SNAP_SANS;
-    ctx.fillStyle = '#72727d';
+    ctx.fillStyle = P.muted;
     snapTracked(ctx, 'WEEKLY SNAPSHOT', R, 114, 3.2, 'right');
 
     ctx.font = '300 29px ' + SNAP_TIGHT;
-    ctx.fillStyle = '#3f3f49';
+    ctx.fillStyle = P.ink2;
     ctx.fillText(snapRangeLabel(week[0].date, week[6].date), M, 198);
 
     /* ── hero ──────────────────────────────────────────────── */
     ctx.font = '500 16px ' + SNAP_SANS;
-    ctx.fillStyle = '#72727d';
+    ctx.fillStyle = P.muted;
     snapTracked(ctx, 'TOTAL THIS WEEK', M, 292, 3.1, 'left');
 
     if ('letterSpacing' in ctx) ctx.letterSpacing = '-10px';
     ctx.font = '200 218px ' + SNAP_TIGHT;
-    ctx.fillStyle = '#141418';
+    ctx.fillStyle = P.ink;
     ctx.fillText(fmt(sum.weekSum), M - 8, 512);
     if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
 
     ctx.font = '300 30px ' + SNAP_SANS;
-    ctx.fillStyle = '#72727d';
+    ctx.fillStyle = P.muted;
     ctx.fillText('questions', M + 2, 568);
 
     /* ── balance against the weekly target ─────────────────── */
     ctx.font = '500 16px ' + SNAP_SANS;
-    ctx.fillStyle = '#72727d';
+    ctx.fillStyle = P.muted;
     snapTracked(ctx, 'BALANCE', M, 664, 3.1, 'left');
 
     const deltaText = diff > 0 ? '+' + fmt(diff) + ' above target'
@@ -3247,9 +3911,9 @@ kbd{
     const pillW = deltaW + 34;
     const pillY = 630;
     snapRound(ctx, R - pillW, pillY, pillW, pillH, 24);
-    ctx.fillStyle = diff >= 0 ? ACCENT_SOFT : '#f5f5f8';
+    ctx.fillStyle = diff >= 0 ? P.accentSoft : P.soft;
     ctx.fill();
-    ctx.fillStyle = diff >= 0 ? '#8e2449' : '#3f3f49';
+    ctx.fillStyle = diff >= 0 ? P.accentInk : P.ink2;
     ctx.fillText(deltaText, R - pillW + 17, pillY + 31);
 
     const railY = 710;
@@ -3257,25 +3921,25 @@ kbd{
     const scale = Math.max(target, sum.weekSum, 1) * 1.08;
     const fillW = Math.min(1, sum.weekSum / scale) * CW;
     snapRound(ctx, M, railY, CW, railH, 6);
-    ctx.fillStyle = '#f3f3f6';
+    ctx.fillStyle = P.empty;
     ctx.fill();
     ctx.save();
     snapRound(ctx, M, railY, CW, railH, 6);
     ctx.clip();
-    ctx.fillStyle = ACCENT;
+    ctx.fillStyle = P.accent;
     ctx.fillRect(M, railY, fillW, railH);
     ctx.restore();
 
     const tickX = M + (target / scale) * CW;
     snapRound(ctx, tickX - 3.5, railY - 15, 7, railH + 30, 3.5);
-    ctx.fillStyle = '#fcfcfd';
+    ctx.fillStyle = P.bg;
     ctx.fill();
     snapRound(ctx, tickX - 1.25, railY - 11, 2.5, railH + 22, 1.25);
-    ctx.fillStyle = '#141418';
+    ctx.fillStyle = P.ink;
     ctx.fill();
 
     ctx.font = '400 17px ' + SNAP_SANS;
-    ctx.fillStyle = '#9c9ca7';
+    ctx.fillStyle = P.faint;
     ctx.fillText('0', M, railY + 46);
     ctx.textAlign = 'center';
     ctx.fillText('target ' + fmt(target), tickX, railY + 46);
@@ -3283,10 +3947,10 @@ kbd{
 
     /* ── seven day cells ───────────────────────────────────── */
     ctx.font = '500 16px ' + SNAP_SANS;
-    ctx.fillStyle = '#72727d';
+    ctx.fillStyle = P.muted;
     snapTracked(ctx, 'BY DAY', M, 824, 3.1, 'left');
     ctx.font = '400 17px ' + SNAP_SANS;
-    ctx.fillStyle = '#9c9ca7';
+    ctx.fillStyle = P.faint;
     ctx.textAlign = 'right';
     ctx.fillText('last 7 days', R, 824);
     ctx.textAlign = 'left';
@@ -3297,17 +3961,18 @@ kbd{
     const cellTop = 872;
     week.forEach(function (d, i) {
       const x = M + i * (cellW + gap);
+      const lvl = levelFor(d.value, GOAL);
       ctx.font = '500 14px ' + SNAP_SANS;
-      ctx.fillStyle = '#72727d';
+      ctx.fillStyle = P.muted;
       snapTracked(ctx, DAYS[d.date.getDay()].slice(0, 3).toUpperCase(), x + cellW / 2, 856, 1.8, 'center');
 
       snapRound(ctx, x, cellTop, cellW, cellH, 15);
-      ctx.fillStyle = d.value ? mix(ACCENT, SHADES[levelFor(d.value, GOAL)]) : EMPTY;
+      ctx.fillStyle = d.value ? mixToward(P.accent, SHADES[lvl], P.card) : P.empty;
       ctx.fill();
 
       if (d.key === TKEY) {
         ctx.save();
-        ctx.strokeStyle = 'rgba(177,47,95,.55)';
+        ctx.strokeStyle = P.todayRing;
         ctx.lineWidth = 2;
         snapRound(ctx, x - 5, cellTop - 5, cellW + 10, cellH + 10, 19);
         ctx.stroke();
@@ -3315,66 +3980,67 @@ kbd{
       }
 
       ctx.font = '300 28px ' + SNAP_TIGHT;
-      ctx.fillStyle = d.value ? '#3f3f49' : '#9c9ca7';
+      if (!d.value) ctx.fillStyle = P.faint;
+      else ctx.fillStyle = themeMode === 'dark' ? P.ink : P.ink2;
       ctx.textAlign = 'center';
       ctx.fillText(fmt(d.value), x + cellW / 2, cellTop + cellH + 37);
       ctx.textAlign = 'left';
     });
 
     /* ── streak + grace bank ───────────────────────────────── */
-    snapLine(ctx, M, 1104, R);
+    snapLine(ctx, M, 1104, R, P.line);
 
     ctx.font = '500 16px ' + SNAP_SANS;
-    ctx.fillStyle = '#72727d';
+    ctx.fillStyle = P.muted;
     snapTracked(ctx, 'STREAK', M, 1152, 3.1, 'left');
 
-    snapShield(ctx, M, 1184, 52, 60, sum.currentStreak > 0);
+    snapShield(ctx, M, 1184, 52, 60, sum.currentStreak > 0, P);
 
     ctx.font = '500 15px ' + SNAP_SANS;
-    ctx.fillStyle = '#72727d';
+    ctx.fillStyle = P.muted;
     snapTracked(ctx, 'CURRENT STREAK', M + 78, 1196, 2.4, 'left');
 
     if ('letterSpacing' in ctx) ctx.letterSpacing = '-4px';
     ctx.font = '200 100px ' + SNAP_TIGHT;
-    ctx.fillStyle = '#141418';
+    ctx.fillStyle = P.ink;
     const streakText = fmt(sum.currentStreak);
     ctx.fillText(streakText, M + 74, 1292);
     const streakW = ctx.measureText(streakText).width;
     if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
 
     ctx.font = '300 24px ' + SNAP_SANS;
-    ctx.fillStyle = '#72727d';
+    ctx.fillStyle = P.muted;
     ctx.fillText(sum.currentStreak === 1 ? 'day' : 'days', M + 74 + streakW + 12, 1290);
 
     ctx.font = '400 21px ' + SNAP_SANS;
-    ctx.fillStyle = '#72727d';
+    ctx.fillStyle = P.muted;
     ctx.fillText('personal best ' + plural(sum.bestStreak, 'day'), M + 76, 1334);
 
     ctx.font = '500 15px ' + SNAP_SANS;
-    ctx.fillStyle = '#72727d';
+    ctx.fillStyle = P.muted;
     snapTracked(ctx, 'GRACE BANK', R, 1196, 2.4, 'right');
 
     for (let i = 0; i < 2; i++) {
-      snapShield(ctx, R - 64 + i * 36, 1216, 28, 32, i < INSURANCE.bank);
+      snapShield(ctx, R - 64 + i * 36, 1216, 28, 32, i < INSURANCE.bank, P);
     }
     ctx.font = '400 21px ' + SNAP_SANS;
-    ctx.fillStyle = '#72727d';
+    ctx.fillStyle = P.muted;
     ctx.textAlign = 'right';
     ctx.fillText(INSURANCE.bank + ' of 2 banked', R, 1292);
     if (INSURANCE.used > 0) {
-      ctx.fillStyle = '#9c9ca7';
+      ctx.fillStyle = P.faint;
       ctx.fillText(plural(INSURANCE.used, 'grace day') + ' used', R, 1334);
     }
     ctx.textAlign = 'left';
 
     /* ── subject split ─────────────────────────────────────── */
-    snapLine(ctx, M, 1394, R);
+    snapLine(ctx, M, 1394, R, P.line);
 
     ctx.font = '500 16px ' + SNAP_SANS;
-    ctx.fillStyle = '#72727d';
+    ctx.fillStyle = P.muted;
     snapTracked(ctx, 'SUBJECTS', M, 1442, 3.1, 'left');
     ctx.font = '400 17px ' + SNAP_SANS;
-    ctx.fillStyle = '#9c9ca7';
+    ctx.fillStyle = P.faint;
     ctx.textAlign = 'right';
     ctx.fillText('this week', R, 1442);
     ctx.textAlign = 'left';
@@ -3391,23 +4057,23 @@ kbd{
       ctx.fill();
 
       ctx.font = '500 16px ' + SNAP_SANS;
-      ctx.fillStyle = '#72727d';
+      ctx.fillStyle = P.muted;
       snapTracked(ctx, s.short.toUpperCase(), x + 21, 1480, 2.2, 'left');
 
       if ('letterSpacing' in ctx) ctx.letterSpacing = '-3px';
       ctx.font = '200 56px ' + SNAP_TIGHT;
-      ctx.fillStyle = '#141418';
+      ctx.fillStyle = P.ink;
       const valText = fmt(v);
       ctx.fillText(valText, x, 1558);
       const valW = ctx.measureText(valText).width;
       if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
 
       ctx.font = '300 20px ' + SNAP_SANS;
-      ctx.fillStyle = '#72727d';
+      ctx.fillStyle = P.muted;
       ctx.fillText('/ ' + fmt(TARGETS[s.id] * 7), x + valW + 10, 1556);
 
       snapRound(ctx, x, 1584, colW, 6, 3);
-      ctx.fillStyle = '#f3f3f6';
+      ctx.fillStyle = P.empty;
       ctx.fill();
       snapRound(ctx, x, 1584, Math.min(1, v / (TARGETS[s.id] * 7)) * colW, 6, 3);
       ctx.fillStyle = s.color;
@@ -3415,35 +4081,35 @@ kbd{
     });
 
     /* ── footer ────────────────────────────────────────────── */
-    snapLine(ctx, M, 1702, R);
+    snapLine(ctx, M, 1702, R, P.line);
 
     if ('letterSpacing' in ctx) ctx.letterSpacing = '-1px';
     ctx.font = '200 30px ' + SNAP_TIGHT;
-    ctx.fillStyle = '#141418';
+    ctx.fillStyle = P.ink;
     const solvedText = fmt(sum.allTime);
     ctx.fillText(solvedText, M, 1770);
     const solvedW = ctx.measureText(solvedText).width;
     if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
 
     ctx.font = '300 21px ' + SNAP_SANS;
-    ctx.fillStyle = '#72727d';
+    ctx.fillStyle = P.muted;
     ctx.fillText('solved all-time', M + solvedW + 10, 1768);
 
     ctx.font = '500 13px ' + SNAP_SANS;
-    ctx.fillStyle = '#9c9ca7';
+    ctx.fillStyle = P.faint;
     snapTracked(ctx, 'SIMULATED AIR', R, 1742, 2.2, 'right');
     ctx.font = '300 24px ' + SNAP_TIGHT;
-    ctx.fillStyle = '#3f3f49';
+    ctx.fillStyle = P.ink2;
     ctx.textAlign = 'right';
     ctx.fillText('#' + fmt(calcAIR(sum.allTime)), R, 1778);
     ctx.textAlign = 'left';
 
-    ctx.fillStyle = ACCENT;
+    ctx.fillStyle = P.accent;
     ctx.beginPath();
     ctx.arc(M + 3, 1836, 3, 0, Math.PI * 2);
     ctx.fill();
     ctx.font = '400 17px ' + SNAP_SANS;
-    ctx.fillStyle = '#9c9ca7';
+    ctx.fillStyle = P.faint;
     ctx.fillText('local-first · jeetracker', M + 14, 1842);
     ctx.textAlign = 'right';
     ctx.fillText(TODAY.getDate() + ' ' + MONTHS[TODAY.getMonth()] + ' ' + TODAY.getFullYear(), R, 1842);
@@ -3551,6 +4217,7 @@ kbd{
     closeEditor();
     closePalette();
     closeHelp();
+    closeInstall(true);
 
     snapshotBackdrop.classList.add('show');
     lockScroll(true);
@@ -3659,6 +4326,231 @@ kbd{
   /* ══════════════════════════════════════════════════════════
      DATA PORTABILITY
   ══════════════════════════════════════════════════════════ */
+
+  /* <csv-core>
+     Pure CSV parsing, serialisation and merge rules. No DOM and no
+     app state: tests/csv.test.mjs extracts this block and runs it in
+     Node against the same source the browser uses.
+  */
+  const CSV_HEADER = 'date,maths,physics,chemistry,total';
+  const CSV_ALIASES = {
+    date: ['date', 'day'],
+    maths: ['maths', 'math', 'mathematics', 'm'],
+    physics: ['physics', 'phys', 'p'],
+    chemistry: ['chemistry', 'chem', 'c'],
+    total: ['total']
+  };
+
+  function csvEscape(value) {
+    const s = String(value);
+    return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }
+
+  /* RFC 4180 reader: quoted fields, doubled quotes, commas inside quotes,
+     CRLF / LF / CR, and an optional UTF-8 BOM. Fully blank lines are
+     dropped before validation so a trailing newline is not a skipped row. */
+  function csvParseRows(text) {
+    let s = String(text == null ? '' : text);
+    if (s.charCodeAt(0) === 0xfeff) s = s.slice(1);
+
+    const rows = [];
+    let row = [];
+    let field = '';
+    let quoted = false;
+    let i = 0;
+
+    while (i < s.length) {
+      const ch = s.charAt(i);
+
+      if (quoted) {
+        if (ch === '"') {
+          if (s.charAt(i + 1) === '"') {
+            field += '"';
+            i += 2;
+          } else {
+            quoted = false;
+            i++;
+          }
+        } else {
+          field += ch;
+          i++;
+        }
+        continue;
+      }
+
+      if (ch === '"' && field.trim() === '') {
+        field = '';
+        quoted = true;
+        i++;
+        continue;
+      }
+      if (ch === ',') {
+        row.push(field);
+        field = '';
+        i++;
+        continue;
+      }
+      if (ch === '\r' || ch === '\n') {
+        row.push(field);
+        rows.push(row);
+        row = [];
+        field = '';
+        i += (ch === '\r' && s.charAt(i + 1) === '\n') ? 2 : 1;
+        continue;
+      }
+
+      field += ch;
+      i++;
+    }
+
+    if (field !== '' || row.length) {
+      row.push(field);
+      rows.push(row);
+    }
+
+    return rows.filter(function (cells) {
+      return cells.some(function (cell) { return String(cell).trim() !== ''; });
+    });
+  }
+
+  /* Returns a column map, or null when the row is not a usable header.
+     Unknown or duplicate canonical columns make the header invalid. */
+  function csvHeaderMap(row) {
+    const map = {};
+    const seen = {};
+    for (let i = 0; i < row.length; i++) {
+      const name = String(row[i] == null ? '' : row[i]).trim().toLowerCase();
+      if (!name) continue;
+      let col = null;
+      Object.keys(CSV_ALIASES).some(function (key) {
+        if (CSV_ALIASES[key].indexOf(name) >= 0) { col = key; return true; }
+        return false;
+      });
+      if (!col || seen[col]) return null;
+      seen[col] = true;
+      map[col] = i;
+    }
+    if (map.date === undefined) return null;
+    if (map.maths === undefined && map.physics === undefined && map.chemistry === undefined) return null;
+    return map;
+  }
+
+  function csvLooksLikeHeader(row) {
+    const first = String(row && row[0] != null ? row[0] : '').trim().toLowerCase();
+    return CSV_ALIASES.date.indexOf(first) >= 0;
+  }
+
+  /* Strict ISO day key. Calendar-valid, not in the future, and never a
+     year before 1900. `todayKey` keeps this function pure for tests. */
+  function csvCleanDate(value, todayKey) {
+    const s = String(value == null ? '' : value).trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return '';
+    const y = Number(s.slice(0, 4));
+    const mo = Number(s.slice(5, 7));
+    const d = Number(s.slice(8, 10));
+    if (y < 1900 || mo < 1 || mo > 12 || d < 1) return '';
+    const leap = (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
+    const monthDays = [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][mo - 1];
+    if (d > monthDays) return '';
+    if (todayKey && s > todayKey) return '';
+    return s;
+  }
+
+  /* Integers only. Blank is 0, negatives clamp to 0, values above 9999
+     clamp to 9999. Anything non-numeric invalidates the row rather than
+     silently becoming a zero that could delete a day. */
+  function csvCleanInt(value) {
+    const s = String(value == null ? '' : value).trim();
+    if (s === '') return { ok: true, value: 0 };
+    if (!/^[+-]?\d+$/.test(s)) return { ok: false, value: 0 };
+    let n = Number(s);
+    if (!isFinite(n)) return { ok: false, value: 0 };
+    n = Math.round(n);
+    if (n < 0) n = 0;
+    if (n > 9999) n = 9999;
+    return { ok: true, value: n };
+  }
+
+  /* Parses a document into { ok, reason, rows, skipped }. A headerless file
+     uses the canonical order date,maths,physics,chemistry. Duplicate dates
+     are kept in file order; csvMerge lets the last one win. */
+  function csvParse(text, todayKey) {
+    const rows = csvParseRows(text);
+    if (!rows.length) return { ok: false, reason: 'empty', rows: [], skipped: 0 };
+
+    let map;
+    let body;
+    if (csvLooksLikeHeader(rows[0])) {
+      map = csvHeaderMap(rows[0]);
+      if (!map) return { ok: false, reason: 'header', rows: [], skipped: 0 };
+      body = rows.slice(1);
+    } else {
+      map = { date: 0, maths: 1, physics: 2, chemistry: 3 };
+      body = rows;
+    }
+
+    const out = [];
+    let skipped = 0;
+
+    body.forEach(function (cells) {
+      const cell = function (col) {
+        const idx = map[col];
+        if (idx === undefined) return '';
+        return cells[idx] === undefined ? '' : cells[idx];
+      };
+
+      const key = csvCleanDate(cell('date'), todayKey);
+      if (!key) { skipped++; return; }
+
+      const m = csvCleanInt(cell('maths'));
+      const p = csvCleanInt(cell('physics'));
+      const c = csvCleanInt(cell('chemistry'));
+      if (!m.ok || !p.ok || !c.ok) { skipped++; return; }
+
+      out.push({ key: key, m: m.value, p: p.value, c: c.value });
+    });
+
+    if (!out.length) return { ok: false, reason: 'rows', rows: [], skipped: skipped };
+    return { ok: true, reason: '', rows: out, skipped: skipped };
+  }
+
+  /* Ascending by ISO date, RFC 4180 quoting, CRLF line endings, and a
+     recomputed total. No BOM: the payload is plain ASCII, which Excel
+     already reads cleanly. */
+  function csvSerialize(data) {
+    const lines = [CSV_HEADER];
+    Object.keys(data || {}).sort().forEach(function (key) {
+      const e = (data && data[key]) || {};
+      const m = Number(e.m) || 0;
+      const p = Number(e.p) || 0;
+      const c = Number(e.c) || 0;
+      lines.push([key, m, p, c, m + p + c].map(csvEscape).join(','));
+    });
+    return lines.join('\r\n') + '\r\n';
+  }
+
+  /* Merge rules: each valid date overwrites all three subjects, an
+     all-zero date deletes the day, and every date absent from the file
+     keeps its stored value. Returns a fresh object so commit() can take
+     one snapshot and one write. */
+  function csvMerge(data, rows) {
+    const next = {};
+    Object.keys(data || {}).forEach(function (key) {
+      const e = data[key] || {};
+      next[key] = { m: Number(e.m) || 0, p: Number(e.p) || 0, c: Number(e.c) || 0 };
+    });
+
+    const touched = {};
+    (rows || []).forEach(function (r) {
+      touched[r.key] = true;
+      if (!r.m && !r.p && !r.c) delete next[r.key];
+      else next[r.key] = { m: r.m, p: r.p, c: r.c };
+    });
+
+    return { data: next, days: Object.keys(touched).length };
+  }
+  /* </csv-core> */
+
   function exportData() {
     const payload = {
       app: 'JEE Tracker',
@@ -3676,6 +4568,34 @@ kbd{
     a.remove();
     setTimeout(function () { URL.revokeObjectURL(url); }, 1200);
     toast('Exported ' + plural(Object.keys(state.data).length, 'day') + ' of data');
+  }
+
+  function exportCSV() {
+    const count = Object.keys(state.data).length;
+    const blob = new Blob([csvSerialize(state.data)], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'jee-tracker-' + TKEY + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1200);
+    toast('Exported ' + plural(count, 'day') + ' as CSV');
+  }
+
+  function importCSV(text) {
+    const parsed = csvParse(text, TKEY);
+    if (!parsed.ok) {
+      if (parsed.reason === 'empty') toast('That CSV is empty');
+      else if (parsed.reason === 'header') toast('That CSV header doesn’t match the format');
+      else toast('No usable rows in that CSV');
+      return;
+    }
+
+    const merged = csvMerge(state.data, parsed.rows);
+    commit(function () { state.data = merged.data; });
+    toast('Imported ' + plural(merged.days, 'day') + ' · ' + plural(parsed.skipped, 'row') + ' skipped', { undo: true });
   }
 
   function clearAll() {
@@ -3705,6 +4625,22 @@ kbd{
     reader.readAsText(file);
   });
 
+  document.getElementById('csvInput').addEventListener('change', function () {
+    const input = this;
+    const file = input.files && input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function () {
+      importCSV(String(reader.result));
+      input.value = '';
+    };
+    reader.onerror = function () {
+      toast('Could not read that CSV');
+      input.value = '';
+    };
+    reader.readAsText(file);
+  });
+
   /* ══════════════════════════════════════════════════════════
      EVENTS
   ══════════════════════════════════════════════════════════ */
@@ -3721,9 +4657,12 @@ kbd{
         const a = act.dataset.act;
         if (a === 'export') exportData();
         else if (a === 'import') document.getElementById('fileInput').click();
+        else if (a === 'export-csv') exportCSV();
+        else if (a === 'import-csv') document.getElementById('csvInput').click();
         else if (a === 'shortcuts') openHelp();
         else if (a === 'palette') openPalette();
         else if (a === 'snapshot') openSnapshot();
+        else if (a === 'install') openInstall();
       }
     });
 
@@ -3768,7 +4707,8 @@ kbd{
         return;
       }
       if (e.key === 'Escape') {
-        if (snapshotBackdrop.classList.contains('show')) closeSnapshot();
+        if (installBackdrop.classList.contains('show')) closeInstall();
+        else if (snapshotBackdrop.classList.contains('show')) closeSnapshot();
         else if (paletteBackdrop.classList.contains('show')) closePalette();
         else if (helpBackdrop.classList.contains('show')) closeHelp();
         else if (editingKey) closeEditor();
@@ -3776,12 +4716,22 @@ kbd{
         return;
       }
       if (typing) return;
+      if ((e.key === 'd' || e.key === 'D') && !mod && !e.altKey) {
+        e.preventDefault();
+        toggleTheme();
+        return;
+      }
       if (paletteBackdrop.classList.contains('show') || helpBackdrop.classList.contains('show') ||
-          snapshotBackdrop.classList.contains('show')) return;
+          snapshotBackdrop.classList.contains('show') || installBackdrop.classList.contains('show')) return;
 
       if (e.key === '?') {
         e.preventDefault();
         openHelp();
+        return;
+      }
+      if ((e.key === 'i' || e.key === 'I') && !mod && !e.altKey) {
+        e.preventDefault();
+        openInstall();
         return;
       }
       if ((e.key === 't' || e.key === 'T') && !mod && !e.altKey) {
@@ -3793,6 +4743,13 @@ kbd{
         if (editingKey) return;
         e.preventDefault();
         openSnapshot();
+        return;
+      }
+      if ((e.key === 'e' || e.key === 'E') && !mod && !e.altKey) {
+        if (editingKey) return;
+        e.preventDefault();
+        if (e.shiftKey) document.getElementById('csvInput').click();
+        else exportCSV();
         return;
       }
       if (/^[1-4]$/.test(e.key) && !mod && !e.altKey) {
@@ -3828,15 +4785,19 @@ kbd{
   ══════════════════════════════════════════════════════════ */
   function init() {
     loadState();
+    syncThemeTokens();
     buildChrome();
     buildOverview();
     SUBJECTS.forEach(buildSubjectView);
     bindEvents();
+    initThemeWatcher();
+    initPWA();
     render();
 
     currentView = '';
     const pref = state.prefs.view;
     switchView((pref && document.getElementById('view-' + pref)) ? pref : 'overview');
+    handleLaunchAction();
   }
 
   init();

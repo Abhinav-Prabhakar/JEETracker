@@ -1,0 +1,86 @@
+{
+  "name": "JEE Tracker",
+  "short_name": "JEE Tracker",
+  "description": "A quiet, local-first JEE question tracker: a one-hue contribution year, all-time and 7-day totals, streaks, and a simulated JEE Advanced AIR.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone"],
+  "orientation": "any",
+  "lang": "en",
+  "dir": "ltr",
+  "background_color": "#FCFCFD",
+  "theme_color": "#B12F5F",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {
+      "src": "./assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "./assets/icons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "./assets/preview.png",
+      "sizes": "1440x1440",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "The overview: today's subjects, all-time totals, simulated AIR, the contribution year, and personal records"
+    },
+    {
+      "src": "./assets/week-card.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "A weekly snapshot share card drawn from the last seven days"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Today's log",
+      "short_name": "Today",
+      "description": "Open today's question log",
+      "url": "./?action=today",
+      "icons": [
+        {
+          "src": "./assets/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Weekly snapshot",
+      "short_name": "Snapshot",
+      "description": "Open the weekly snapshot card",
+      "url": "./?action=snapshot",
+      "icons": [
+        {
+          "src": "./assets/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}
