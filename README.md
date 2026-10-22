@@ -388,5 +388,6 @@ No frameworks, no build step, no dependencies.
 
 <p align="center">
   <sub><em>Built for the days when motivation is gone and the only thing left is the next question.</em></sub><br><br>
-  <sub>Vanilla HTML, CSS and JavaScript · Inter &amp; Inter Tight · no build, no backend, no noise.</sub>
+  <sub>Vanilla HTML, CSS and JavaScript · Inter &amp; Inter Tight · no build, no backend, no noise.</sub><br><br>
+  <sub>Built by <a href="https://github.com/Abhinav-Prabhakar">Abhinav</a> · <a href="https://github.com/Abhinav-Prabhakar/GrainCLI">grain</a> for the hours, JEE Tracker for the questions.</sub>
 </p>
