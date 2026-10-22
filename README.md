@@ -1,5 +1,5 @@
 <div align="center">
-  <a href="https://abhinav-prabhakar.github.io/jeetrack/">
+  <a href="https://abhinav-prabhakar.github.io/JEETracker/">
     <img src="assets/banner.svg" width="100%" alt="JEE Tracker — a quiet dashboard for a loud ambition">
   </a>
 </div>
@@ -12,10 +12,10 @@
 </p>
 
 <p align="center">
-  <a href="https://abhinav-prabhakar.github.io/jeetrack/">
+  <a href="https://abhinav-prabhakar.github.io/JEETracker/">
     <img alt="Open the live tracker" src="https://img.shields.io/badge/open_the-live_tracker-B12F5F?style=for-the-badge&labelColor=141418">
   </a>
-  <a href="https://github.com/Abhinav-Prabhakar/jeetrack">
+  <a href="https://github.com/Abhinav-Prabhakar/JEETracker">
     <img alt="Source on GitHub" src="https://img.shields.io/badge/source-GitHub-141418?style=for-the-badge&logo=github">
   </a>
 </p>
@@ -266,13 +266,13 @@ Shortcuts pause automatically while you are typing.
 
 ## Run it
 
-**Live:** [abhinav-prabhakar.github.io/jeetrack](https://abhinav-prabhakar.github.io/jeetrack/)
+**Live:** [abhinav-prabhakar.github.io/JEETracker](https://abhinav-prabhakar.github.io/JEETracker/)
 
 Locally, there is nothing to install:
 
 ```bash
-git clone https://github.com/Abhinav-Prabhakar/jeetrack.git
-cd jeetrack
+git clone https://github.com/Abhinav-Prabhakar/JEETracker.git
+cd JEETracker
 open index.html
 ```
 
@@ -311,7 +311,7 @@ If the browser offers its own install prompt, <kbd>I</kbd> opens it. If it does 
   <br><sub>Press <kbd>I</kbd> anywhere. The sheet adapts to iPadOS, Windows, macOS and the current browser.</sub>
 </p>
 
-**Static deployment.** `manifest.webmanifest`, `sw.js`, and `assets/icons/` sit at the repo root, and every URL in the manifest is relative. That keeps `start_url`, `scope`, and the service worker inside `/jeetrack/` on GitHub Pages. The service worker is **network-first for navigation** and stale-while-revalidate for same-origin assets, so an online reload picks up the latest HTML instead of pinning an old build. Old caches are deleted on activate. Icons and the manifest are precached; the README screenshots are not.
+**Static deployment.** `manifest.webmanifest`, `sw.js`, and `assets/icons/` sit at the repo root, and every URL in the manifest is relative. That keeps `start_url`, `scope`, and the service worker inside `/JEETracker/` on GitHub Pages. The service worker is **network-first for navigation** and stale-while-revalidate for same-origin assets, so an online reload picks up the latest HTML instead of pinning an old build. Old caches are deleted on activate. Icons and the manifest are precached; the README screenshots are not.
 
 ---
 
@@ -458,7 +458,7 @@ Display numerals use **Inter Tight 200**, UI text uses **Inter 300–500**, and 
 <summary><b>Project structure and code map</b></summary>
 
 ```text
-jeetrack/
+JEETracker/
 ├── index.html            # the entire app: tokens, markup, store, AIR, views, snapshot
 ├── manifest.webmanifest  # installable PWA metadata
 ├── sw.js                 # app-shell cache, network-first navigation
