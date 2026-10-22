@@ -27,6 +27,9 @@
   <img alt="localStorage" src="https://img.shields.io/badge/storage-localStorage-B12F5F?style=flat-square&labelColor=141418">
   <img alt="No dependencies" src="https://img.shields.io/badge/dependencies-0-141418?style=flat-square">
   <img alt="GitHub Pages" src="https://img.shields.io/badge/deploy-GitHub%20Pages-141418?style=flat-square&logo=github&logoColor=white">
+  <img alt="Installable PWA" src="https://img.shields.io/badge/PWA-installable-B12F5F?style=flat-square&labelColor=141418">
+  <img alt="Light and dark themes" src="https://img.shields.io/badge/theme-light%20%2F%20dark-141418?style=flat-square">
+  <img alt="CSV import and export" src="https://img.shields.io/badge/CSV-import%20%2F%20export-B12F5F?style=flat-square&labelColor=141418">
 </p>
 
 <p align="center">
@@ -37,8 +40,11 @@
   <a href="#personal-records">Records</a> ·
   <a href="#weekly-snapshot">Snapshot</a> ·
   <a href="#simulated-air">AIR</a> ·
+  <a href="#dark-mode">Dark</a> ·
+  <a href="#install-it">Install</a> ·
   <a href="#keyboard">Keys</a> ·
-  <a href="#data--persistence">Data</a>
+  <a href="#data--persistence">Data</a> ·
+  <a href="#csv--spreadsheets">CSV</a>
 </p>
 
 ---
@@ -97,6 +103,7 @@ No sync. No noise. Just your effort, your data, and a clean place to put it.
 
 | <h3>1</h3><sub>HTML file</sub> | <h3>0</h3><sub>dependencies</sub> | <h3>2</h3><sub>grace tokens</sub> | <h3>7</h3><sub>days per snapshot</sub> |
 | :--: | :--: | :--: | :--: |
+
 > **First run seeds a demo history** so the year, streaks, records, and AIR have something to show. Clear it in one step with <kbd>⌘K</kbd> → **Clear all data** (undoable), then log your own questions.
 
 
@@ -113,6 +120,24 @@ No sync. No noise. Just your effort, your data, and a clean place to put it.
 - **Day breakdown.** Hover any square in the year for the date, total, and the Maths / Physics / Chemistry split.
 - **Milestones.** Hover a stop on the AIR rail to see the exact question threshold behind the rank.
 - **Records.** Hover a tile in the records board for the range, the definition, or how long the run lasted.
+
+---
+
+## Dark mode
+
+<p align="center">
+  <img src="assets/preview-dark.png" width="100%" alt="JEE Tracker in dark mode — graphite cards, a raspberry contribution year, and subject hues">
+</p>
+
+The same ledger, after dark. Graphite surfaces, hairline borders, and the same
+raspberry year — not an inversion. The sun/moon button in the top bar switches
+themes; <kbd>D</kbd> does it from anywhere, including inside a modal. Your
+toggle is remembered; first visits follow the system preference. A quick QA
+override is available at `?theme=dark` or `?theme=light`.
+
+The overview tracker stays one hue, the subject pages keep indigo / amber /
+teal, and the weekly share card is drawn in the dark palette when the app is
+dark.
 
 ---
 
@@ -226,6 +251,10 @@ Press <kbd>?</kbd> in the app for the same map.
 | <kbd>⇧</kbd> + <kbd>M</kbd> / <kbd>P</kbd> / <kbd>C</kbd> | Remove one question |
 | <kbd>T</kbd> | Open today's day editor |
 | <kbd>W</kbd> | Open the weekly snapshot |
+| <kbd>E</kbd> | Export all days as CSV |
+| <kbd>⇧</kbd> + <kbd>E</kbd> | Import a CSV file |
+| <kbd>D</kbd> | Toggle light / dark theme |
+| <kbd>I</kbd> | Install the app |
 | <kbd>⌘K</kbd> / <kbd>Ctrl K</kbd> | Command palette |
 | <kbd>⌘Z</kbd> / <kbd>Ctrl Z</kbd> | Undo the last change |
 | <kbd>?</kbd> | Shortcut sheet |
@@ -247,20 +276,49 @@ cd jeetrack
 open index.html
 ```
 
-Or serve it:
+For the installable and offline path, serve it from localhost (a secure context, so the service worker can register):
 
 ```bash
 python3 -m http.server 8080
 # http://localhost:8080
 ```
 
+The CSV parser and its round-trip rules have a dependency-free Node suite:
+
+```bash
+node --test tests/csv.test.mjs
+```
+
 The repository is deployed with **GitHub Pages** from `main` / `(root)`. There is no build step, no actions pipeline, and no server.
+
+---
+
+## Install it
+
+JEE Tracker is a proper installable PWA. The icon opens it without browser chrome, the manifest offers **Today's log** and **Weekly snapshot** shortcuts, and the app shell is cached for offline use. No store, no account, no separate build.
+
+| Platform | How |
+| :-- | :-- |
+| **iPad / iPhone** | Open the live site in **Safari** → **Share** → **Add to Home Screen**. Safari is the browser that installs a home-screen web app on iPadOS. |
+| **Windows** | In Chrome or Edge: browser menu → **Install JEE Tracker** (Edge also has **Apps → Install this site as an app**). |
+| **macOS** | Safari 17+ → **File → Add to Dock**. Chrome or Edge → menu → **Install JEE Tracker**. |
+| **Any browser** | Press <kbd>I</kbd> in the app, or use **Install app** in the footer / command palette. |
+
+If the browser offers its own install prompt, <kbd>I</kbd> opens it. If it does not, the app shows the exact steps for the current platform. Installed or not, the journal lives in `localStorage`; installation only changes how the app opens.
+
+<p align="center">
+  <img src="assets/install.png" width="760" alt="The install instructions sheet">
+  <br><sub>Press <kbd>I</kbd> anywhere. The sheet adapts to iPadOS, Windows, macOS and the current browser.</sub>
+</p>
+
+**Static deployment.** `manifest.webmanifest`, `sw.js`, and `assets/icons/` sit at the repo root, and every URL in the manifest is relative. That keeps `start_url`, `scope`, and the service worker inside `/jeetrack/` on GitHub Pages. The service worker is **network-first for navigation** and stale-while-revalidate for same-origin assets, so an online reload picks up the latest HTML instead of pinning an old build. Old caches are deleted on activate. Icons and the manifest are precached; the README screenshots are not.
 
 ---
 
 ## Data & persistence
 
-Everything lives in **one localStorage key** on your machine.
+Everything lives in **two localStorage keys** on your machine. The tracker data
+is one; the theme choice is the other.
 
 | | |
 | :-- | :-- |
@@ -270,7 +328,8 @@ Everything lives in **one localStorage key** on your machine.
 | **Sync** | The `storage` event refreshes other open tabs. |
 | **Undo** | The last 60 states, in memory. |
 | **Migration** | The original `jee-tracker.v1` payload is imported on first run. |
-| **Portability** | Export a timestamped JSON file, or import one from the footer / palette. Imports are sanitised and undoable. |
+| **Portability** | Export a timestamped JSON backup, restore one, or move days through a spreadsheet-friendly CSV. Imports are validated, merged, and undoable. |
+| **Theme** | `jee-tracker.theme` stores `light` or `dark` after an explicit toggle. |
 
 <details>
 <summary><b>The saved shape</b></summary>
@@ -287,9 +346,81 @@ Everything lives in **one localStorage key** on your machine.
 
 </details>
 
-There is no server, no account, and no analytics. The only network request the page makes is for the **Inter / Inter Tight** webfonts; remove the `<link>` tags in `index.html` for a fully offline copy.
+There is no server, no account, and no analytics. The only cross-origin request is for the **Inter / Inter Tight** webfonts; same-origin app files are cached by the service worker so the tracker keeps working offline. Remove the `<link>` tags in `index.html` for a fully self-contained copy.
 
-> "Backend" here means the browser: a small, explicit store (`loadState` → `persist` → `render`) with a versioned schema, import/export, cross-tab sync, and undo.
+> The data layer is the browser: a small, explicit store (`loadState` → `persist` → `render`) with a versioned schema, import/export, cross-tab sync, and undo.
+
+---
+
+## CSV & spreadsheets
+
+The JSON backup is the full snapshot. CSV is the door to a spreadsheet —
+export the ledger, edit it in Sheets or Excel, and bring it back.
+
+### Export
+
+Use **Export CSV** in the footer, **Export CSV** in the palette, or press
+<kbd>E</kbd>. The file is `jee-tracker-YYYY-MM-DD.csv` (the export date),
+sorted oldest first and covering every year:
+
+```csv
+date,maths,physics,chemistry,total
+2024-02-29,5,6,7,18
+2026-10-21,20,21,22,63
+2026-10-22,30,31,32,93
+```
+
+Fields use RFC 4180 quoting, rows end in CRLF, and the file is plain UTF-8.
+`total` is recomputed on export and ignored on import. Every export raises a
+toast with the day count.
+
+### Import
+
+Use **Import CSV** in the footer, the palette, or press <kbd>⇧</kbd> +
+<kbd>E</kbd>. The header is optional and case-insensitive:
+
+| Field | Accepted names |
+| :-- | :-- |
+| date | `date`, `day` |
+| maths | `maths`, `math`, `mathematics`, `m` |
+| physics | `physics`, `phys`, `p` |
+| chemistry | `chemistry`, `chem`, `c` |
+| total | `total` — optional, ignored |
+
+When the first cell is not a date header, the file is read headerless in the
+canonical order `date,maths,physics,chemistry`:
+
+```csv
+2026-10-21,20,21,22
+2026-10-22,30,31,32
+```
+
+The reader understands quoted fields, doubled quotes, commas inside quotes,
+CRLF / LF / CR, blank lines, and an optional UTF-8 BOM.
+
+**Validation**
+
+- Dates must be real ISO `YYYY-MM-DD` keys, from 1900 onward, and never in the
+  future. A bad or future date skips that row and counts as skipped.
+- Subject values must be integers. Blank cells are `0`; negative values clamp
+  to `0`; values above `9999` clamp to `9999`. A non-numeric value skips the
+  row rather than silently becoming zero. A subject column that is absent
+  (for example a headerless file with only `date,maths`) also reads as `0`.
+- Duplicate dates are allowed; the last row wins.
+
+**Merge**
+
+| In the CSV | In the store |
+| :-- | :-- |
+| A valid date | Overwrites that day's Maths, Physics and Chemistry |
+| A date with three zeros | Deletes the day |
+| A date not in the file | Left exactly as it was |
+| Duplicate dates | The last row wins |
+
+The whole file is one commit: one toast (`Imported N days · M rows skipped`) with
+**Undo**, one `⌘Z` / `Ctrl Z` restore, and an immediate save. Empty files, a bad
+header, or a file with no valid rows raise a quiet toast and change nothing. Days
+from every year are kept; nothing is scoped to the current one.
 
 ---
 
@@ -328,16 +459,24 @@ Display numerals use **Inter Tight 200**, UI text uses **Inter 300–500**, and 
 
 ```text
 jeetrack/
-├── index.html        # the entire app: tokens, markup, store, AIR, views, snapshot
-├── design.md         # design system + component contracts
+├── index.html            # the entire app: tokens, markup, store, AIR, views, snapshot
+├── manifest.webmanifest  # installable PWA metadata
+├── sw.js                 # app-shell cache, network-first navigation
+├── design.md             # design system + component contracts
 ├── README.md
-├── .nojekyll         # GitHub Pages
+├── tests/
+│   └── csv.test.mjs      # CSV parser, validation and round-trip suite
+├── .nojekyll             # GitHub Pages
 └── assets/
+    ├── icons/            # 192 / 512 / maskable / Apple touch / favicon PNGs
     ├── banner.svg
     ├── preview.png
+    ├── preview-dark.png
     ├── subject.png
+    ├── subject-dark.png
     ├── palette.png
     ├── records.png
+    ├── install.png
     ├── snapshot.png
     └── week-card.png
 ```
@@ -357,6 +496,9 @@ Inside `index.html`:
 | `buildGraph` | The 53 × 7 year grid, tooltips, day editor hook |
 | `renderSnapshot` | Canvas 2D 1080 × 1920 share card |
 | `COMMANDS` | Palette actions, grouped and searchable |
+| `csvParse` / `csvSerialize` / `csvMerge` | RFC 4180 reader, writer, validation and merge rules |
+| `initPWA` / `openInstall` | Install prompt, platform sheet, service-worker registration |
+| `handleLaunchAction` | Opens `?action=today` / `?action=snapshot`, then cleans the URL |
 | `bindEvents` / `init` | Keyboard map, midnight rollover, boot |
 
 No frameworks, no build step, no dependencies.
@@ -377,12 +519,10 @@ No frameworks, no build step, no dependencies.
 
 ## Roadmap
 
-- [ ] An optional sync adapter behind the existing store interface
-- [ ] CSV / spreadsheet import
+- [x] CSV / spreadsheet export and import
 - [ ] Chapter-level tags and weak-topic analysis
 - [ ] Mock-test log with score → rank overlay
-- [ ] A dark theme built from the same tokens
-- [ ] Installable PWA with offline caching
+- [x] Installable PWA with offline caching
 
 ---
 
