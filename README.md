@@ -13,6 +13,7 @@
 <p align="center">
   <a href="#quick-start">Quick start</a> ·
   <a href="#the-dashboard">Dashboard</a> ·
+  <a href="#weekly-snapshot">Snapshot</a> ·
   <a href="#simulated-air">AIR model</a> ·
   <a href="#keyboard">Shortcuts</a> ·
   <a href="#data--persistence">Data</a> ·
@@ -73,6 +74,7 @@ python3 -m http.server 8080
 | **Grace bank** | Streak insurance: two shield tokens, a five-segment rail toward the next token, and the earned / used / covered history on hover. |
 | **Contribution** | The whole year in a 53 × 7 grid. **One raspberry hue**, four densities. Today is outlined; future days recede; grace days carry a soft accent dot. Click any past day to edit it. |
 | **Personal records** | A closing all-time plaque of eight compact tiles: best day, best 7 days, best month, days active, longest Triple Master run, and the three subject peaks. Hover or focus any tile for its range and context. |
+| **Weekly snapshot** | An optional 1080 × 1920 share card for the last seven days: hero total, seven-cell raspberry week, target balance, streak and grace shields, subject split, all-time and simulated AIR. Download it, share it as a file, or copy it to the clipboard. |
 
 ### Subject pages
 
@@ -176,6 +178,43 @@ stay focused on one subject.
 
 ---
 
+## Weekly snapshot
+
+An optional share card for the week, generated on demand — a designed
+1080 × 1920 story image, not a screenshot.
+
+<p align="center">
+  <img src="assets/snapshot.png" width="70%" alt="The weekly snapshot modal over the blurred overview">
+</p>
+
+Open it three ways:
+
+| Entry point | How |
+| --- | --- |
+| Overview header | The ghost **Weekly snapshot** button, right of the title |
+| Command palette | <kbd>⌘K</kbd> / <kbd>Ctrl K</kbd> → **Create weekly snapshot** |
+| Keyboard | <kbd>W</kbd> |
+
+The card carries the last seven days: the total with the word *questions*, a
+seven-cell raspberry heatmap with weekday labels and counts (today outlined), a
+balance rail against the 7 × 100 weekly target with the target marker, current
+and best streak with the grace-bank shields, a subject split in subject hues,
+and the all-time total with the simulated AIR in the footer. It is redrawn from
+current data every time it opens.
+
+Actions in the modal: **Download PNG** (`jee-week-2026-10-22.png`),
+**Share** through the Web Share API when file sharing is available, and
+**Copy** through `ClipboardItem` when it is. Unsupported actions hide
+themselves. It is drawn with Canvas 2D after `document.fonts.ready`, so it
+uses Inter and Inter Tight when they have loaded. Nothing is saved and no
+image library is involved.
+
+<p align="center">
+  <img src="assets/week-card.png" width="32%" alt="The generated 1080 by 1920 weekly snapshot card">
+</p>
+
+---
+
 ## Keyboard
 
 Press <kbd>?</kbd> in the app for the same map.
@@ -186,10 +225,11 @@ Press <kbd>?</kbd> in the app for the same map.
 | <kbd>M</kbd> <kbd>P</kbd> <kbd>C</kbd> | Add one question to that subject (today) |
 | <kbd>⇧</kbd> + <kbd>M</kbd> / <kbd>P</kbd> / <kbd>C</kbd> | Remove one question |
 | <kbd>T</kbd> | Open today's day editor |
+| <kbd>W</kbd> | Create a weekly snapshot |
 | <kbd>⌘K</kbd> / <kbd>Ctrl K</kbd> | Command palette |
 | <kbd>⌘Z</kbd> / <kbd>Ctrl Z</kbd> | Undo the last change |
 | <kbd>?</kbd> | Shortcut sheet |
-| <kbd>Esc</kbd> | Close the palette, sheet or editor |
+| <kbd>Esc</kbd> | Close the palette, sheet, editor or snapshot |
 
 Shortcuts pause automatically while you are typing in an input.
 
@@ -262,7 +302,9 @@ JEETrack/
     ├── banner.svg
     ├── preview.png
     ├── subject.png
-    └── palette.png
+    ├── palette.png
+    ├── snapshot.png
+    └── week-card.png
 ```
 
 Inside `index.html`:
@@ -275,6 +317,7 @@ Inside `index.html`:
 | `computeInsurance` | Deterministic grace-bank replay over history (bank, progress, covered days) |
 | `computeRecords` | All-time personal records: best day/week/month, Triple Master, subject peaks |
 | `calcAIR` | The piecewise rank curve and milestone rail position |
+| `drawWeekCard` | The 1080 × 1920 Canvas 2D weekly share card |
 | `buildOverview` / `buildSubjectView` | Static skeletons, built once |
 | `render*` | Targeted updates — numbers, rails, bars, graph cells |
 | `buildGraph` | The 53 × 7 year grid, tooltips and day editor hook |
@@ -298,6 +341,7 @@ No frameworks, no build step, no dependencies.
 | First-run demo history | `seed()` |
 | Palette commands | `COMMANDS` |
 | Personal records | `computeRecords()` and `RECORD_DEFS` |
+| Weekly snapshot card | `drawWeekCard()` and `SNAP_W` / `SNAP_H` |
 | Starting view | `prefs.view` in localStorage |
 
 The layout adapts at **980 px** (single-column cards, nav on its own row) and **640 px**

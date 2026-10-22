@@ -1,6 +1,6 @@
 # JEE Tracker — Design System
 
-**Version 1.0 · October 2026**
+**Version 1.1 · October 2026**
 
 A quiet, editorial dashboard for a loud ambition. White space does the work;
 colour is information. Every component below follows these rules so that new
@@ -266,6 +266,51 @@ Done. Inputs commit on every keystroke; `Esc` closes; undo is global.
 uses `--soft` plus a 2 px accent bar. Shortcut chips on the right. Opens with
 `⌘K` / `Ctrl K`.
 
+### Weekly snapshot (overview)
+A ghost action in the overview header, aligned right: a small image glyph and
+`Weekly snapshot` at 11.5 px in `--muted`, on a hairline ghost pill. It is an
+optional share action — never a filled primary CTA. The same action is available
+as `Create weekly snapshot` in the palette and on `W`; the shortcut appears in
+the help sheet.
+
+### Snapshot modal
+A light blurred backdrop (the standard 10 px backdrop) and a 404 px modal.
+Header: `SHARE CARD` eyebrow, `Weekly snapshot` title, close X. The preview is
+the actual generated 1080 × 1920 PNG, scaled down with CSS to the modal width
+and constrained by the viewport height, with 18 px corners and one deep soft
+shadow. Footer: quiet `1080 × 1920 · jee-week-YYYY-MM-DD.png` metadata and a
+single action row — **Download PNG** (ink primary), **Share** (file share,
+hidden when the browser cannot share files) and **Copy** (hidden when
+`ClipboardItem` is unavailable). Success and failure both raise a toast.
+
+`Esc`, the X and a backdrop click close it. Scroll locks, other overlays close
+first, and the overlay stack closes the snapshot before the palette, help sheet
+or editor. Focus is trapped inside the dialog; on close it returns to the
+trigger when that trigger is still visible, otherwise to the overview snapshot
+button or the active nav item. The image is redrawn from current data on every
+open; no state is persisted.
+
+### Snapshot canvas
+Drawn with Canvas 2D at exactly **1080 × 1920** — phone story aspect, 84 px side
+margins. `document.fonts.ready` (with a 900 ms fallback) runs before drawing so
+Inter and Inter Tight are used when available. No image library, no DOM
+capture. One very soft raspberry radial wash sits behind the top; everything
+else is flat.
+
+| Region | Spec |
+| --- | --- |
+| Brand | 46 px raspberry tile with the white bars, `JEE Tracker`, right-aligned `WEEKLY SNAPSHOT` eyebrow at 16 px |
+| Date | Last seven days, e.g. `16 — 22 October 2026`, 29 px Inter Tight 300 |
+| Hero | `TOTAL THIS WEEK` eyebrow, total at 218 px Inter Tight 200, `questions` at 30 px |
+| Balance | Delta pill (`+34 above target` / `−126 below target`), 12 px rail, ink target tick with a canvas-coloured halo, `target 700` under the tick. Scale is `max(week, 700) × 1.08` |
+| Week row | Exactly seven 120 × 106 cells, 15 px radius, 12 px gap; the §2 raspberry density ramp; three-letter weekday above, count below; today carries a 2 px accent outline offset 5 px |
+| Streak | 52 × 60 shield, current streak at 100 px, personal best beneath; two 28 × 32 grace shields and `n of 2 banked` on the right |
+| Subjects | Three columns: hue dot, name, 56 px value with its weekly target (`/ 280` for Maths, `/ 210` for Physics and Chemistry), 6 px subject-hue rail |
+| Footer | `all-time solved` on the left, `SIMULATED AIR` + `#` rank on the right, then the tiny `local-first · jeetracker` mark and date |
+
+The snapshot uses one accent only (plus subject hues in the subject row). Text
+stays left-aligned and editorial; no table, no dense grid, no fake chrome.
+
 ### Toast
 Dark pill, bottom centre, check glyph, optional **Undo** in accent-soft.
 Maximum three, 2.8 s, slides 10 px.
@@ -286,6 +331,8 @@ border and lift. `kbd`: 10 px, white, hairline, 5 px radius.
 | View enter | 420 ms, 10 px rise | `cubic-bezier(.22,.8,.24,1)` |
 | Heatmap first paint | 500 ms, 4 ms per column | `cubic-bezier(.2,.8,.2,1)` |
 | Grace bank pop | 420 ms, 1.14 scale | `cubic-bezier(.22,.8,.24,1)` |
+| Snapshot modal | 320 ms, 10 px rise | `cubic-bezier(.22,.8,.24,1)` |
+| Snapshot loading label | 1.4 s opacity pulse | `ease-in-out` |
 
 No parallax, no autoplay, no looping animation. `prefers-reduced-motion:
 reduce` removes transforms and count-ups.
@@ -330,7 +377,12 @@ CSS custom properties live in `:root` in `index.html`. Components use
 `.rv-rail`, `.rv-ring`,
 `.view-head`, `.eyebrow`, `.num-display`, `.target`, `.steps`, `.step`,
 `.bar`, `.rail`, `.legend`, `.graph`, `.ggrid`, `.cell`, `.palette`, `.toast`,
-`.grace`, `.shield`, `.grace-rail`, `.tipnum`.
+`.grace`, `.shield`, `.grace-rail`, `.tipnum`,
+`.snap-btn`, `.snapshot-modal`, `.snap-head`, `.snap-preview`, `.snap-loading`,
+`.snap-bar`, `.snap-meta`, `.snap-actions`, `.snap-note`.
+
+The snapshot canvas itself is procedural (`drawWeekCard` in `index.html`), so it
+introduces no new DOM classes beyond the modal above.
 
 Future components must reuse these tokens and classes before introducing new
 ones. Additions belong in this document first.
