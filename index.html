@@ -526,7 +526,15 @@ kbd{
 .contrib-sub b{font-weight:400;color:var(--muted)}
 .legend{display:flex;align-items:center;gap:4px;font-size:9.5px;color:var(--muted);padding-top:2px}
 .legend em{font-style:normal;margin:0 3px;color:var(--faint)}
-.legend i{width:10px;height:10px;border-radius:2.5px;display:block;border:1px solid var(--legend-line)}
+.legend i{
+  width:10px;height:10px;border-radius:2.5px;display:block;
+  border:1px solid var(--legend-line);cursor:pointer;
+  transition:transform .14s ease,box-shadow .14s ease;
+}
+.legend i:hover,.legend i:focus-visible{
+  transform:scale(1.35);position:relative;z-index:2;
+  box-shadow:0 0 0 1.5px var(--card),0 2px 8px -1px var(--cell-shadow);
+}
 .graph{margin-top:16px;overflow-x:auto;overflow-y:hidden;padding-bottom:2px}
 .graph::-webkit-scrollbar{height:4px}
 .graph::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
@@ -1870,6 +1878,97 @@ kbd{
         (hit.value > TARGETS[kind] ? ' · ' + (hit.value - TARGETS[kind]) + ' above' : '') + '</div>';
   }
 
+  /* ── tooltip copy: contribution legend thresholds ─────────── */
+  function legendThreshold(level, target) {
+    target = target || GOAL;
+    if (level < 0) {
+      return {
+        title: '0 questions',
+        pct: '0% of daily target',
+        tier: 'No activity',
+        aria: '0 questions, 0% of daily target'
+      };
+    }
+    const cutoffs = [
+      Math.floor(target * 0.20),
+      Math.floor(target * 0.45),
+      Math.floor(target * 0.70)
+    ];
+    if (level === 0) {
+      const minQ = 1;
+      const maxQ = Math.max(1, cutoffs[0]);
+      const title = minQ === maxQ ? minQ + ' question' : minQ + ' – ' + maxQ + ' questions';
+      const pct = '1% – 20% of daily target';
+      return {
+        title: title,
+        pct: pct,
+        tier: 'Tier 1 threshold',
+        aria: title + ', ' + pct
+      };
+    }
+    if (level === 1) {
+      const minQ = Math.max(1, cutoffs[0]) + 1;
+      const maxQ = Math.max(minQ, cutoffs[1]);
+      const title = minQ === maxQ ? minQ + ' question' : minQ + ' – ' + maxQ + ' questions';
+      const pct = '21% – 45% of daily target';
+      return {
+        title: title,
+        pct: pct,
+        tier: 'Tier 2 threshold',
+        aria: title + ', ' + pct
+      };
+    }
+    if (level === 2) {
+      const minQ = Math.max(1, cutoffs[1]) + 1;
+      const maxQ = Math.max(minQ, cutoffs[2]);
+      const title = minQ === maxQ ? minQ + ' question' : minQ + ' – ' + maxQ + ' questions';
+      const pct = '46% – 70% of daily target';
+      return {
+        title: title,
+        pct: pct,
+        tier: 'Tier 3 threshold',
+        aria: title + ', ' + pct
+      };
+    }
+    const minQ = Math.max(1, cutoffs[2]) + 1;
+    const title = minQ + '+ questions';
+    const pct = '> 70% of daily target';
+    return {
+      title: title,
+      pct: pct,
+      tier: 'Tier 4 threshold (peak)',
+      aria: title + ', ' + pct
+    };
+  }
+
+  function legendTipHTML(box) {
+    const lvl = parseInt(box.dataset.level, 10);
+    const gid = box.dataset.graph || (box.closest('[data-graph]') ? box.closest('[data-graph]').dataset.graph : 'all');
+    let target = GOAL;
+    let label = 'Overall';
+    let base = ACCENT;
+    if (gid && gid.indexOf('subject-') === 0) {
+      const sid = gid.slice(8);
+      if (SUBJ[sid]) {
+        target = TARGETS[sid];
+        label = SUBJ[sid].short;
+        base = SUBJ[sid].color;
+      }
+    } else if (gid && SUBJ[gid]) {
+      target = TARGETS[gid];
+      label = SUBJ[gid].short;
+      base = SUBJ[gid].color;
+    }
+    const th = legendThreshold(lvl, target);
+    const bg = box.style.backgroundColor || box.style.background || (lvl < 0 ? EMPTY : mix(base, SHADES[lvl]));
+    return '<div class="tip-title">' + th.title + '</div>' +
+      '<div class="tip-sub">' + th.pct + '</div>' +
+      '<div class="tip-rows">' +
+        '<span class="tip-row"><i style="background:' + bg + '"></i>' + th.tier + '</span>' +
+      '</div>' +
+      '<div class="tip-hint">' + label + ' · ' + target + ' q / day</div>';
+  }
+
   /* ══════════════════════════════════════════════════════════
      SIMULATED AIR — continuous piecewise linear
   ══════════════════════════════════════════════════════════ */
@@ -2002,7 +2101,7 @@ kbd{
         const s = SUBJ[gid.slice(8)];
         if (s) base = s.color;
       }
-      legend.innerHTML = legendHTML(base);
+      legend.innerHTML = legendHTML(base, gid);
     });
   }
 
@@ -2282,11 +2381,27 @@ kbd{
     });
   }
 
-  function legendHTML(base) {
-    return '<span>less</span>' +
-      '<i style="background:' + EMPTY + '"></i>' +
-      SHADES.map(function (t) { return '<i style="background:' + mix(base, t) + '"></i>'; }).join('') +
-      '<span>more</span>';
+  function legendHTML(base, gid) {
+    gid = gid || 'all';
+    let target = GOAL;
+    if (gid.indexOf('subject-') === 0) {
+      const sid = gid.slice(8);
+      if (SUBJ[sid]) target = TARGETS[sid];
+    } else if (SUBJ[gid]) {
+      target = TARGETS[gid];
+    }
+    const tEmpty = legendThreshold(-1, target);
+    let html = '<span>less</span>' +
+      '<i style="background:' + EMPTY + '" data-level="-1" data-graph="' + gid + '" tabindex="0" role="img" aria-label="' + tEmpty.aria + '"></i>';
+
+    SHADES.forEach(function (t, i) {
+      const color = mix(base, t);
+      const th = legendThreshold(i, target);
+      html += '<i style="background:' + color + '" data-level="' + i + '" data-graph="' + gid + '" tabindex="0" role="img" aria-label="' + th.aria + '"></i>';
+    });
+
+    html += '<span>more</span>';
+    return html;
   }
 
   function contribHTML(graphId, base) {
@@ -2296,7 +2411,7 @@ kbd{
           '<span class="label">Contribution</span>' +
           '<div class="contrib-sub" data-contrib-sub></div>' +
         '</div>' +
-        '<div class="legend" data-legend>' + legendHTML(base) + '</div>' +
+        '<div class="legend" data-legend data-graph="' + graphId + '">' + legendHTML(base, graphId) + '</div>' +
       '</div>' +
       '<div class="graph" data-graph="' + graphId + '"></div>' +
       '<div class="contrib-foot">' +
@@ -4668,8 +4783,13 @@ kbd{
 
     document.getElementById('cmdkBtn').addEventListener('click', openPalette);
 
-    /* micro tooltips for week bars and streak ticks */
+    /* micro tooltips for legend boxes, week bars, and streak ticks */
     document.addEventListener('mouseover', function (e) {
+      const box = e.target.closest('.legend i');
+      if (box && box.dataset.level !== undefined) {
+        showTip(legendTipHTML(box), e.clientX, e.clientY);
+        return;
+      }
       const item = e.target.closest('.metric-visual .wbar, .metric-visual .pip');
       if (!item || !item.dataset.key) return;
       const date = parseKey(item.dataset.key);
@@ -4685,10 +4805,27 @@ kbd{
     });
     document.addEventListener('mousemove', function (e) {
       if (!tipEl.classList.contains('show')) return;
-      if (e.target.closest('.metric-visual .wbar, .metric-visual .pip')) moveTip(e.clientX, e.clientY);
+      if (e.target.closest('.legend i, .metric-visual .wbar, .metric-visual .pip')) moveTip(e.clientX, e.clientY);
     });
     document.addEventListener('mouseout', function (e) {
+      const box = e.target.closest('.legend i');
+      if (box) {
+        if (!e.relatedTarget || !e.relatedTarget.closest || !e.relatedTarget.closest('.legend i')) {
+          hideTip();
+        }
+        return;
+      }
       if (e.target.closest('.metric-visual .wbar, .metric-visual .pip')) hideTip();
+    });
+    document.addEventListener('focusin', function (e) {
+      const box = e.target.closest('.legend i');
+      if (box && box.dataset.level !== undefined) {
+        const r = box.getBoundingClientRect();
+        showTip(legendTipHTML(box), r.left + r.width / 2, r.top + 10);
+      }
+    });
+    document.addEventListener('focusout', function (e) {
+      if (e.target.closest('.legend i')) hideTip();
     });
 
     document.addEventListener('keydown', function (e) {
