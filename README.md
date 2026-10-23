@@ -173,7 +173,7 @@ No badges. No confetti. Just the number and the day it happened.
 | :-- | :-- |
 | **Best single day** | Highest total questions in one calendar day. |
 | **Best 7 days** | Highest sum across any seven consecutive calendar days. |
-| **Triple Master** | Longest run of consecutive days with Maths ≥ 40, Physics ≥ 30, and Chemistry ≥ 30. |
+| **Triple Master** | Longest run of consecutive days with Maths ≥ 34, Physics ≥ 33, and Chemistry ≥ 33. |
 | **Maths peak** | Highest Maths count in a day. |
 | **Physics peak** | Highest Physics count in a day. |
 | **Chemistry peak** | Highest Chemistry count in a day. |

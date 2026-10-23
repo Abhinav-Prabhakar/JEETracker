@@ -68,8 +68,8 @@ The overview tracker is **monochrome**. One hue, four densities.
 | 3 | 75% | 45–70% of target |
 | 4 | 100% | above 70% of target |
 
-Density is computed against the relevant daily target (100 overall, 40 Maths,
-30 Physics, 30 Chemistry). Subject pages reuse the same four steps with their
+Density is computed against the relevant daily target (100 overall, 34 Maths,
+33 Physics, 33 Chemistry). Subject pages reuse the same four steps with their
 own hue. Legend copy is always "Less → More"; exact counts live in the tooltip.
 
 A **grace day** is not a density step. When a fully missed day is covered by
@@ -301,7 +301,7 @@ every render — no new persisted state. Definitions:
 - **Best 7 days** — highest sum of any seven consecutive calendar days,
   including zero-question days inside the window.
 - **Triple Master** — longest run of consecutive days meeting all three
-  targets (Maths 40, Physics 30, Chemistry 30); a missing or below-target day
+  targets (Maths 34, Physics 33, Chemistry 33); a missing or below-target day
   breaks it.
 - **Subject peaks** — highest Maths / Physics / Chemistry count in one day.
 - **Best month** — highest total in a local `YYYY-MM` month.
@@ -364,7 +364,7 @@ layout, density ramp and hierarchy are identical in both.
 | Balance | Delta pill (`+34 above target` / `−126 below target`), 12 px rail, ink target tick with a canvas-coloured halo, `target 700` under the tick. Scale is `max(week, 700) × 1.08` |
 | Week row | Exactly seven 120 × 106 cells, 15 px radius, 12 px gap; the §2 raspberry density ramp; three-letter weekday above, count below; today carries a 2 px accent outline offset 5 px |
 | Streak | 52 × 60 shield, current streak at 100 px, personal best beneath; two 28 × 32 grace shields and `n of 2 banked` on the right |
-| Subjects | Three columns: hue dot, name, 56 px value with its weekly target (`/ 280` for Maths, `/ 210` for Physics and Chemistry), 6 px subject-hue rail |
+| Subjects | Three columns: hue dot, name, 56 px value with its weekly target (`/ 238` for Maths, `/ 231` for Physics and Chemistry), 6 px subject-hue rail |
 | Footer | `all-time solved` on the left, `SIMULATED AIR` + `#` rank on the right, then the tiny `local-first · jeetracker` mark and date |
 
 The snapshot uses one accent only (plus subject hues in the subject row). Text
