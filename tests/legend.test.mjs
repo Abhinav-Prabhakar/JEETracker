@@ -131,3 +131,11 @@ test('index.html contains legend tooltip interactions and styles', () => {
   assert.ok(html.includes('legendTipHTML'), 'legendTipHTML function must be implemented');
   assert.ok(html.includes("role=\"tooltip\""), 'tooltip element must exist');
 });
+
+test('the legend never claims the graph hook used to build the grid', () => {
+  // Regression: putting data-graph on .legend made `$('[data-graph]')` resolve to
+  // the legend, so the contribution cells were rendered into the legend row.
+  assert.ok(html.includes('<div class="legend" data-legend>'), 'legend must not carry data-graph');
+  assert.ok(!html.includes('data-legend data-graph'), 'legend and graph hooks must stay separate');
+  assert.ok(html.includes("$('.graph[data-graph]', el)"), 'graph lookup must be scoped to .graph');
+});

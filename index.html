@@ -2092,7 +2092,7 @@ kbd{
 
   function refreshLegends() {
     $$('.contrib').forEach(function (card) {
-      const graph = card.querySelector('[data-graph]');
+      const graph = card.querySelector('.graph[data-graph]');
       const legend = card.querySelector('[data-legend]');
       if (!graph || !legend) return;
       const gid = graph.dataset.graph || 'all';
@@ -2411,7 +2411,7 @@ kbd{
           '<span class="label">Contribution</span>' +
           '<div class="contrib-sub" data-contrib-sub></div>' +
         '</div>' +
-        '<div class="legend" data-legend data-graph="' + graphId + '">' + legendHTML(base, graphId) + '</div>' +
+        '<div class="legend" data-legend>' + legendHTML(base, graphId) + '</div>' +
       '</div>' +
       '<div class="graph" data-graph="' + graphId + '"></div>' +
       '<div class="contrib-foot">' +
@@ -2654,7 +2654,7 @@ kbd{
       atHint: $('[data-at-hint]', el),
       metrics: bindMetrics(el),
       records: bindRecords(el),
-      graph: $('[data-graph]', el)
+      graph: $('.graph[data-graph]', el)
     };
 
     SUBJECTS.forEach(function (s) {
@@ -2746,7 +2746,7 @@ kbd{
         sub: $('[data-contrib-sub]', el),
         foot: $('[data-contrib-foot]', el)
       },
-      graph: $('[data-graph]', el)
+      graph: $('.graph[data-graph]', el)
     };
 
     buildGraph(REFS[s.id].graph, s.id, s.color);
