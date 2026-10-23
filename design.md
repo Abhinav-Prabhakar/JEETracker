@@ -70,9 +70,10 @@ The overview tracker is **monochrome**. One hue, four densities.
 
 Density is computed against the relevant daily target (100 overall, 34 Maths,
 33 Physics, 33 Chemistry). Subject pages reuse the same four steps with their
-own hue. Legend copy is always "Less → More"; hovering or focusing any legend
-swatch reveals the exact question threshold, target percentage, and tier in the
-standard dark tooltip.
+own hue. Legend copy is always "Less → More". Hovering or focusing any legend
+swatch lifts it and opens a small anchored readout above the legend: the tier
+number, the exact question range, the target band, and the daily target it is
+measured against.
 
 A **grace day** is not a density step. When a fully missed day is covered by
 streak insurance, the overview cell keeps an `--accent-soft` wash and carries a
