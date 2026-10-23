@@ -2,7 +2,7 @@
   "name": "JEE Tracker",
   "short_name": "JEE Tracker",
   "description": "A quiet, local-first JEE question tracker: a one-hue contribution year, all-time and 7-day totals, streaks, and a simulated JEE Advanced AIR.",
-  "id": "./",
+  "id": "/JEETracker/",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
