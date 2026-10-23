@@ -529,11 +529,6 @@ kbd{
 .legend i{
   width:10px;height:10px;border-radius:2.5px;display:block;
   border:1px solid var(--legend-line);cursor:pointer;
-  transition:transform .16s var(--ease),box-shadow .16s var(--ease);
-}
-.legend i:hover,.legend i:focus-visible{
-  transform:scale(1.28) translateY(-1px);
-  box-shadow:0 0 0 1px var(--card),0 4px 12px -4px var(--cell-shadow);
 }
 .legend i:focus-visible{outline:1.5px solid var(--accent);outline-offset:2px}
 .graph{margin-top:16px;overflow-x:auto;overflow-y:hidden;padding-bottom:2px}
@@ -696,51 +691,6 @@ kbd{
 .tip .tip-row{display:flex;align-items:center;gap:4px;color:var(--tip-row);white-space:nowrap}
 .tip .tip-row i{width:5px;height:5px;border-radius:50%;display:block}
 .tip .tip-hint{color:var(--tip-hint);margin-top:5px;font-size:10px;white-space:nowrap}
-
-/* anchored legend readout */
-.tip.legend-tip{
-  min-width:186px;max-width:240px;padding:11px 12px 11px;border-radius:12px;
-  border:1px solid rgba(255,255,255,.09);
-}
-.tip.legend-tip::after{
-  content:'';position:absolute;left:var(--tip-arrow-x,50%);bottom:-4.5px;
-  width:9px;height:9px;background:var(--tip-bg);
-  border-right:1px solid rgba(255,255,255,.09);
-  border-bottom:1px solid rgba(255,255,255,.09);
-  border-bottom-right-radius:2px;
-  transform:translateX(-50%) rotate(45deg);
-}
-.tip.legend-tip.legend-tip-below::after{
-  bottom:auto;top:-4.5px;
-  border-right:0;border-bottom:0;
-  border-left:1px solid rgba(255,255,255,.09);
-  border-top:1px solid rgba(255,255,255,.09);
-  border-radius:2px 0 0 0;
-}
-.tip.legend-tip .lt-head{display:flex;align-items:center;justify-content:space-between;gap:14px}
-.tip.legend-tip .lt-kicker{
-  font-size:8.5px;line-height:1.2;font-weight:500;letter-spacing:.085em;
-  text-transform:uppercase;color:var(--tip-hint);white-space:nowrap;
-}
-.tip.legend-tip .lt-chip{
-  width:9px;height:9px;border-radius:2.5px;flex-shrink:0;
-  box-shadow:0 0 0 1px rgba(255,255,255,.16);
-}
-.tip.legend-tip .lt-value{
-  margin-top:5px;font-family:'Inter Tight','Inter',sans-serif;
-  font-size:17px;font-weight:400;line-height:1.15;letter-spacing:-.02em;
-  color:var(--tip-ink);white-space:nowrap;
-}
-.tip.legend-tip .lt-ramp{display:flex;gap:3px;margin-top:9px}
-.tip.legend-tip .lt-step{
-  flex:1;height:3px;border-radius:2px;opacity:.18;
-  transition:opacity .14s ease;
-}
-.tip.legend-tip .lt-step.on{opacity:1;box-shadow:0 0 0 1px rgba(255,255,255,.14)}
-.tip.legend-tip .lt-foot{
-  display:flex;align-items:center;justify-content:space-between;gap:14px;
-  margin-top:7px;font-size:9.5px;line-height:1.3;color:var(--tip-hint);white-space:nowrap;
-}
 
 /* ── backdrops, modal, editor ──────────────────────────────── */
 .backdrop{
@@ -1927,74 +1877,29 @@ kbd{
   /* ── tooltip copy: contribution legend thresholds ─────────── */
   function legendThreshold(level, target) {
     target = target || GOAL;
-    const cutoffs = [
+    if (level < 0) return '0';
+    const cut = [
       Math.floor(target * 0.20),
       Math.floor(target * 0.45),
       Math.floor(target * 0.70)
     ];
-    if (level < 0) {
-      return {
-        tier: 0,
-        step: 'Empty',
-        title: '0 questions',
-        band: '0% of target',
-        aria: 'Empty, 0 questions, 0% of daily target'
-      };
-    }
-    const bands = [
-      'Up to 20% of target',
-      '20 – 45% of target',
-      '45 – 70% of target',
-      'Above 70% of target'
-    ];
-    const mins = [1, cutoffs[0] + 1, cutoffs[1] + 1, cutoffs[2] + 1];
-    const maxs = [cutoffs[0], cutoffs[1], cutoffs[2], null];
-    const min = Math.max(1, mins[level]);
-    const max = maxs[level] === null ? null : Math.max(min, maxs[level]);
-    const title = max === null
-      ? min + '+ questions'
-      : (min === max ? min + ' question' : min + ' – ' + max + ' questions');
-    const step = 'Tier ' + (level + 1) + ' of 4';
-    return {
-      tier: level + 1,
-      step: step,
-      title: title,
-      band: bands[level],
-      aria: step + ', ' + title + ', ' + bands[level].toLowerCase()
-    };
+    if (level === 0) return '1 – ' + Math.max(1, cut[0]);
+    if (level === 1) return (cut[0] + 1) + ' – ' + Math.max(cut[0] + 1, cut[1]);
+    if (level === 2) return (cut[1] + 1) + ' – ' + Math.max(cut[1] + 1, cut[2]);
+    return (cut[2] + 1) + '+';
   }
 
   function legendTipHTML(box) {
     const lvl = parseInt(box.dataset.level, 10);
     const gid = box.dataset.graph || 'all';
     let target = GOAL;
-    let label = 'Overall';
-    let base = ACCENT;
     if (gid.indexOf('subject-') === 0) {
       const sid = gid.slice(8);
-      if (SUBJ[sid]) {
-        target = TARGETS[sid];
-        label = SUBJ[sid].short;
-        base = SUBJ[sid].color;
-      }
+      if (SUBJ[sid]) target = TARGETS[sid];
     } else if (SUBJ[gid]) {
       target = TARGETS[gid];
-      label = SUBJ[gid].short;
-      base = SUBJ[gid].color;
     }
-    const th = legendThreshold(lvl, target);
-    const swatch = lvl < 0 ? EMPTY : mix(base, SHADES[lvl]);
-    const ramp = SHADES.map(function (t, i) {
-      return '<span class="lt-step' + (i === lvl ? ' on' : '') +
-        '" style="background:' + mix(base, t) + '"></span>';
-    }).join('');
-    return '<div class="lt-head">' +
-        '<span class="lt-kicker">' + label + ' · ' + th.step + '</span>' +
-        '<span class="lt-chip" style="background:' + swatch + '"></span>' +
-      '</div>' +
-      '<div class="lt-value">' + th.title + '</div>' +
-      '<div class="lt-ramp" aria-hidden="true">' + ramp + '</div>' +
-      '<div class="lt-foot"><span>' + th.band + '</span><span>' + target + ' q / day</span></div>';
+    return legendThreshold(lvl, target);
   }
 
   /* ══════════════════════════════════════════════════════════
@@ -2207,7 +2112,6 @@ kbd{
 
   const tipEl = document.getElementById('tip');
   function showTip(html, x, y) {
-    tipEl.classList.remove('legend-tip', 'legend-tip-below');
     tipEl.innerHTML = html;
     tipEl.classList.add('show');
     moveTip(x, y);
@@ -2222,30 +2126,6 @@ kbd{
     if (top + r.height > window.innerHeight - 10) top = window.innerHeight - r.height - 10;
     tipEl.style.left = left + 'px';
     tipEl.style.top = top + 'px';
-  }
-  function showLegendTip(box) {
-    tipEl.classList.add('legend-tip');
-    tipEl.innerHTML = legendTipHTML(box);
-    tipEl.classList.add('show');
-    positionLegendTip(box);
-  }
-  function positionLegendTip(box) {
-    const r = box.getBoundingClientRect();
-    const t = tipEl.getBoundingClientRect();
-    const pad = 10;
-    let left = r.left + r.width / 2 - t.width / 2;
-    left = Math.max(pad, Math.min(left, window.innerWidth - t.width - pad));
-    let top = r.top - t.height - 12;
-    let below = false;
-    if (top < pad) {
-      top = r.bottom + 12;
-      below = true;
-    }
-    tipEl.style.left = left + 'px';
-    tipEl.style.top = top + 'px';
-    tipEl.style.setProperty('--tip-arrow-x',
-      Math.max(12, Math.min(t.width - 12, r.left + r.width / 2 - left)) + 'px');
-    tipEl.classList.toggle('legend-tip-below', below);
   }
   function hideTip() { tipEl.classList.remove('show'); }
 
@@ -2445,12 +2325,12 @@ kbd{
     }
     const tEmpty = legendThreshold(-1, target);
     let html = '<span>less</span>' +
-      '<i style="background:' + EMPTY + '" data-level="-1" data-graph="' + gid + '" tabindex="0" role="img" aria-label="' + tEmpty.aria + '"></i>';
+      '<i style="background:' + EMPTY + '" data-level="-1" data-graph="' + gid + '" tabindex="0" role="img" aria-label="' + tEmpty + ' questions"></i>';
 
     SHADES.forEach(function (t, i) {
       const color = mix(base, t);
       const th = legendThreshold(i, target);
-      html += '<i style="background:' + color + '" data-level="' + i + '" data-graph="' + gid + '" tabindex="0" role="img" aria-label="' + th.aria + '"></i>';
+      html += '<i style="background:' + color + '" data-level="' + i + '" data-graph="' + gid + '" tabindex="0" role="img" aria-label="' + th + ' questions"></i>';
     });
 
     html += '<span>more</span>';
@@ -4840,7 +4720,7 @@ kbd{
     document.addEventListener('mouseover', function (e) {
       const box = e.target.closest('.legend i');
       if (box && box.dataset.level !== undefined) {
-        showLegendTip(box);
+        showTip(legendTipHTML(box), e.clientX, e.clientY);
         return;
       }
       const item = e.target.closest('.metric-visual .wbar, .metric-visual .pip');
@@ -4857,8 +4737,8 @@ kbd{
       );
     });
     document.addEventListener('mousemove', function (e) {
-      if (!tipEl.classList.contains('show') || tipEl.classList.contains('legend-tip')) return;
-      if (e.target.closest('.metric-visual .wbar, .metric-visual .pip')) moveTip(e.clientX, e.clientY);
+      if (!tipEl.classList.contains('show')) return;
+      if (e.target.closest('.legend i, .metric-visual .wbar, .metric-visual .pip')) moveTip(e.clientX, e.clientY);
     });
     document.addEventListener('mouseout', function (e) {
       const box = e.target.closest('.legend i');
@@ -4872,16 +4752,13 @@ kbd{
     });
     document.addEventListener('focusin', function (e) {
       const box = e.target.closest('.legend i');
-      if (box && box.dataset.level !== undefined) showLegendTip(box);
+      if (box && box.dataset.level !== undefined) {
+        const r = box.getBoundingClientRect();
+        showTip(legendTipHTML(box), r.left + r.width / 2, r.top + 10);
+      }
     });
     document.addEventListener('focusout', function (e) {
       if (e.target.closest('.legend i')) hideTip();
-    });
-    window.addEventListener('scroll', function () {
-      if (tipEl.classList.contains('legend-tip')) hideTip();
-    }, { passive: true });
-    window.addEventListener('resize', function () {
-      if (tipEl.classList.contains('legend-tip')) hideTip();
     });
 
     document.addEventListener('keydown', function (e) {
